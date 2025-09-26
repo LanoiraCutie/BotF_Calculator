@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Players with HP Bars and Skills</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="players-container">
+        <h2 style="margin: 0;">Round: <span id="round-counter">1</span></h2>
+        <button onclick="endRound()">End Round</button>
+        <span>Cooldowns reduce by 1 each round.</span>
+        <div style="margin-bottom:10px;">
+            <label>
+                <input type="checkbox" id="crit-checkbox" onchange="window.critActive=this.checked;">
+                Critical Hit(150% Damage)
+            </label>
+            
+        </div>
+        <div class="player-container">
+            <h2>Mandirigma</h2>
+            <div class="controls">
+                <label for="preset-player1">Select Preset:</label>
+                <select id="preset-player1" onchange="applyPreset('player1')">
+                    <option value="glassCanon">Glass Canon</option>
+                    <option value="bruiser">Bruiser</option>
+                    <option value="berserker">Berserker</option>
+                </select>
+                <label for="target-player1">Select Target:</label>
+                <select id="target-player1">
+                    <option value="boss">Boss</option>
+                </select>
+                <label style="margin-left:8px;">
+                    <input type="checkbox" id="mandirigma-rage-checkbox"
+                        onchange="window.mandirigmaRageActive=this.checked;window.mandirigmaRageDefIgnore=this.checked?0.2:0;">
+                    Mandirigma Rage (Berserk) (+50% DMG, ignore 20% DEF)
+                </label>
+            </div>
+            <div class="hp-bar">
+                <div class="hp-fill" id="hp-player1" style="width: 100%;"></div>
+            </div>
+            <div class="stats">
+                <div class="stat">HP: <span id="stats-hp-player1">100</span></div>
+                <div class="stat">ATK: <span id="stats-atk-player1">20</span></div>
+                <div class="stat">DEF: <span id="stats-def-player1">10</span></div>
+            </div>
+            <div class="skills">
+                <div class="skill">
+                    <button onclick="attackEnemy('player1', 0)">Skill 1</button>
+                    <div class="skill-description">Attack: Deals 150% ATK to the boss. (CD: 2)</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player1', 1)">Skill 2</button>
+                    <div class="skill-description">Heavy Attack: Deals 334% ATK to the boss. (CD: 2)</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player1', 2)">Skill 3</button>
+                    <div class="skill-description">All-in Attack: Deals 834% ATK to the boss. (CD: 2)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="player-container">
+            <h2>Bagani</h2>
+            <div class="controls">
+                <label for="preset-player2">Select Preset:</label>
+                <select id="preset-player2" onchange="applyPreset('player2')">
+                    <option value="wall">Wall</option>
+                    <option value="juggernaut">Juggernaut</option>
+                    <option value="damageSoaker">Damage Soaker</option>
+                </select>
+                <label for="target-player2">Select Target:</label>
+                <select id="target-player2">
+                    <option value="player1">Mandirigma</option>
+                    <option value="player2">Bagani</option>
+                    <option value="player3">Babaylan</option>
+                    <option value="player4">Mangangayaw</option>
+                </select>
+                <label style="margin-left:16px;">
+                <input type="checkbox" id="bagani-laststand-checkbox"
+                    onchange="window.baganiLastStandActive=this.checked;">
+                Bagani Last Stand (+50% DEF)
+            </label>
+            </div>
+            <div class="hp-bar">
+                <div class="hp-fill" id="hp-player2" style="width: 100%;"></div>
+            </div>
+            <div class="stats">
+                <div class="stat">HP: <span id="stats-hp-player2">100</span></div>
+                <div class="stat">ATK: <span id="stats-atk-player2">25</span></div>
+                <div class="stat">DEF: <span id="stats-def-player2">15</span></div>
+            </div>
+            <div class="skills">
+                <div class="skill">
+                    <button onclick="attackEnemy('player2', 0)">Skill 1</button>
+                    <div class="skill-description">Shield Bash: Deals damage to the boss. (CD: 2)</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player2', 1)">Skill 2</button>
+                    <div class="skill-description">Defensive Strike: Deals damage to the boss. (CD: 2)</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player2', 2)">Skill 3</button>
+                    <div class="skill-description">Counterattack: Deals damage to the boss. (CD: 2)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="player-container">
+            <h2>Babaylan</h2>
+            <div class="controls">
+                <label for="preset-player3">Select Preset:</label>
+                <select id="preset-player3" onchange="applyPreset('player3')">
+                    <option value="pureHealer">Pure Healer</option>
+                    <option value="supportCleric">Support Cleric</option>
+                    <option value="battlePriest">Battle Priest</option>
+                </select>
+                <label for="target-player3">Select Target:</label>
+                <select id="target-player3">
+                    <option value="player1">Mandirigma</option>
+                    <option value="player2">Bagani</option>
+                    <option value="player3">Babaylan</option>
+                    <option value="player4">Mangangayaw</option>
+                </select>
+            </div>
+            <div class="hp-bar">
+                <div class="hp-fill" id="hp-player3" style="width: 100%;"></div>
+            </div>
+            <div class="stats">
+                <div class="stat">HP: <span id="stats-hp-player3">100</span></div>
+                <div class="stat">MAG: <span id="stats-atk-player3">30</span></div>
+                <div class="stat">DEF: <span id="stats-def-player3">20</span></div>
+            </div>
+            <div class="skills">
+                <div class="skill">
+                    <button onclick="attackEnemy('player3', 0)">Skill 1</button>
+                    <div class="skill-description">Holy Blast: Deals damage to the boss. (CD: 2)</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player3', 1)">Skill 2</button>
+                    <div class="skill-description">Divine Shield: Deals damage to the boss. (CD: 2)</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player3', 2)">Skill 3</button>
+                    <div class="skill-description">Blessing of Strength: Deals damage to the boss. (CD: 2)</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player3', 3)">Skill 4</button>
+                    <div class="skill-description">Resurrection Blast: Deals damage to the boss. (CD: 2)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="player-container">
+            <h2>Mangangayaw</h2>
+            <div class="controls">
+                <label for="preset-player4">Select Preset:</label>
+                <select id="preset-player4" onchange="applyPreset('player4')">
+                    <option value="sniper">Sniper</option>
+                    <option value="ranger">Ranger</option>
+                    <option value="hunter">Hunter</option>
+                </select>
+                <label for="target-player4">Select Target:</label>
+                <select id="target-player4">
+                    <option value="boss">Boss</option>
+                </select>
+            </div>
+            <div class="hp-bar">
+                <div class="hp-fill" id="hp-player4" style="width: 100%;"></div>
+            </div>
+            <div class="stats">
+                <div class="stat">HP: <span id="stats-hp-player4">100</span></div>
+                <div class="stat">ATK: <span id="stats-atk-player4">35</span></div>
+                <div class="stat">DEF: <span id="stats-def-player4">25</span></div>
+            </div>
+            <div class="skills">
+                <div class="skill">
+                    <button onclick="attackEnemy('player4', 0)">Skill 1</button>
+                    <div class="skill-description">Arrow Shot: Deals 15 damage to the selected target. (CD: 2)</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player4', 1)">Skill 2</button>
+                    <div class="skill-description">Piercing Arrow: Deals 25 damage to the selected target.</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player4', 2)">Skill 3</button>
+                    <div class="skill-description">Explosive Shot: Deals 35 damage to the selected target.</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player4', 3)">Skill 4</button>
+                    <div class="skill-description">Hunter's Mark: Deals 50 damage to the selected target.</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player4', 4)">Skill 5</button>
+                    <div class="skill-description">Hunter's Mark: Deals 50 damage to the selected target.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="boss-container">
+        <h2>Boss</h2>
+        <label for="preset-entity">Select Preset:</label>
+        <select id="preset-entity" onchange="applyPreset('boss')">
+            <option value="Bathala">Bathala</option>
+            <option value="Mayari">Mayari</option>
+            <option value="Apolaki">Apolaki</option>
+            <option value="Bakunawa">Bakunawa</option>
+            <option value="Manananggal">Manananggal</option>
+            <option value="Tiyanak">Tiyanak</option>
+            <option value="Siren">Siren</option>
+            <option value="Kapre">Kapre</option>
+        </select>
+        <div class="hp-bar">
+            <div class="hp-fill" id="hp-boss" style="width: 100%;"></div>
+        </div>
+        <div class="stats">
+            <div class="stat">HP: <span id="stats-hp-boss">200</span></div>
+            <div class="stat">ATK: <span id="stats-atk-boss">50</span></div>
+            <div class="stat">MAG: <span id="stats-mag-boss">50</span></div>
+            <div class="stat">DEF: <span id="stats-def-boss">30</span></div>
+        </div>
+
+        <div class="skills" id="boss-skills">
+            <label for="entity-target">Select Target:</label>
+            <select id="entity-target">
+                <option value="player1">Mandirigma</option>
+                <option value="player2">Bagani</option>
+                <option value="player3">Babaylan</option>
+                <option value="player4">Mangangayaw</option>
+            </select>
+            <br><br>
+            <!-- Boss skill buttons/descriptions will be dynamically updated -->
+            <div class="skill">
+                <button id="boss-skill-1" onclick="entityAttack(0)">Skill 1</button>
+                <div class="skill-description" id="boss-skill-desc-1">Skill 1 description</div>
+            </div>
+            <div class="skill">
+                <button id="boss-skill-2" onclick="entityAttack(1)">Skill 2</button>
+                <div class="skill-description" id="boss-skill-desc-2">Skill 2 description</div>
+            </div>
+            <div class="skill">
+                <button id="boss-skill-3" onclick="entityAttack(2)">Skill 3</button>
+                <div class="skill-description" id="boss-skill-desc-3">Skill 3 description</div>
+            </div>
+            <div class="skill">
+                <button id="boss-skill-4" onclick="entityAttack(3)">Skill 4</button>
+                <div class="skill-description" id="boss-skill-desc-4">Skill 4 description</div>
+            </div>
+        </div>
+        <!-- Add damage log output here -->
+        <div id="damage-log"
+            style="margin-top:16px; min-height:80px; max-height:180px; overflow-y:auto; background:#222; color:#fff; font-size:14px; border-radius:6px; padding:8px;">
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function increaseBossDEF() {
+            var input = document.getElementById('boss-def-increase');
+            if (!input) return;
+            var amount = Math.max(0, parseInt(input.value || '0', 10));
+            var boss = window.playersStats ? window.playersStats['boss'] : null;
+            if (!boss) return;
+            boss.def = boss.def + amount;
+            var defEl = document.getElementById('stats-def-boss');
+            if (defEl) defEl.innerText = boss.def;
+            input.value = '0';
+        }
+        function updateBossSkillButtons() {
+            // Get selected preset
+            var bossSelect = document.getElementById('preset-entity');
+            var selectedPreset = bossSelect ? bossSelect.value : 'Bathala';
+            // bossSkills is defined in script.js
+            var skills = (typeof bossSkills !== 'undefined') ? bossSkills[selectedPreset] : null;
+            if (!skills) return;
+            for (var i = 0; i < 4; i++) {
+                var btn = document.getElementById('boss-skill-' + (i + 1));
+                var desc = document.getElementById('boss-skill-desc-' + (i + 1));
+                if (btn && skills[i]) btn.innerText = skills[i].name;
+                if (desc && skills[i]) desc.innerText = skills[i].description;
+            }
+        }
+
+        // Update player buttons to show skill names from playerSkills
+        function updatePlayerSkillButtons() {
+            var playerIds = ['player1','player2','player3','player4'];
+            var playerContainers = document.querySelectorAll('.players-container .player-container');
+            playerIds.forEach(function(pid, idx) {
+                var container = playerContainers[idx];
+                if (!container) return;
+                var skillDivs = container.querySelectorAll('.skills .skill');
+                var skills = (typeof playerSkills !== 'undefined') ? playerSkills[pid] : null;
+                if (!skills) return;
+                skills.forEach(function(skill, sidx) {
+                    var skillDiv = skillDivs[sidx];
+                    if (!skillDiv) return;
+                    var btn = skillDiv.querySelector('button');
+                    if (!btn) return;
+                    btn.innerText = skill.name;
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            applyPreset('player1');
+            applyPreset('player2');
+            applyPreset('player3');
+            applyPreset('player4');
+            applyPreset('boss');
+            updateBossSkillButtons();
+            updatePlayerSkillButtons();
+            if (typeof updateAllSkillCooldownDescriptions === 'function') {
+                updateAllSkillCooldownDescriptions();
+            }
+            if (typeof currentRound !== 'undefined') {
+                const rc = document.getElementById('round-counter');
+                if (rc) rc.innerText = String(currentRound);
+            }
+            var bossSelect = document.getElementById('preset-entity');
+            if (bossSelect) {
+                bossSelect.addEventListener('change', function () {
+                    applyPreset('boss');
+                    updateBossSkillButtons();
+                    updatePlayerSkillButtons();
+                });
+            }
+        });
+
+        // Mandirigma Rage (Berserk) effect
+        window.mandirigmaRageActive = false;
+        window.mandirigmaRageDefIgnore = 0;
+
+        function applyMandirigmaRage() {
+            window.mandirigmaRageActive = true;
+            window.mandirigmaRageDefIgnore = 0.2; // 20% DEF ignore
+            alert("Mandirigma Rage activated! +50% DMG, ignore 20% enemy DEF.");
+        }
+
+        function removeMandirigmaRage() {
+            window.mandirigmaRageActive = false;
+            window.mandirigmaRageDefIgnore = 0;
+            alert("Mandirigma Rage buff removed.");
+        }
+
+        // Patch attackEnemy to apply rage effect
+        const originalAttackEnemy = window.attackEnemy;
+        window.attackEnemy = function (player, skillIndex) {
+            if (player === 'player1' && window.mandirigmaRageActive) {
+                // Temporarily patch calculateDamage for Mandirigma Rage
+                const originalCalculateDamage = window.calculateDamage;
+                window.calculateDamage = function (attacker, target, damagePercent, flatdamage = 0, magPercentDamage = 0, defIgnore = 0) {
+                    const attackerStats = window.playersStats[attacker];
+                    const targetStats = window.playersStats[target];
+                    let atkDamage = 0;
+                    let magDamage = 0;
+                    let def = (targetStats.def || 0) * (1 - defIgnore);
+                    def = def * (1 - window.mandirigmaRageDefIgnore); // ignore 20% DEF
+                    // +50% DMG
+                    if (attacker === 'boss') {
+                        atkDamage = ((flatdamage || 0) + (attackerStats.atk || 0) * (damagePercent || 0)) / (1 + def * 0.01);
+                        magDamage = ((flatdamage || 0) + (attackerStats.mag || 0) * (magPercentDamage || 0)) / (1 + def * 0.01);
+                        return Math.max(1, Math.round((atkDamage + magDamage) * 1.5));
+                    } else {
+                        const attackerATK = attackerStats.mag || attackerStats.atk;
+                        atkDamage = ((flatdamage || 0) + attackerATK * damagePercent) / (1 + def * 0.01);
+                        return Math.max(1, Math.round(atkDamage * 1.5));
+                    }
+                };
+                originalAttackEnemy(player, skillIndex);
+                window.calculateDamage = originalCalculateDamage;
+            } else {
+                originalAttackEnemy(player, skillIndex);
+            }
+        };
+
+        function appendDamageLog(msg) {
+            const logDiv = document.getElementById('damage-log');
+            if (logDiv) {
+                const time = new Date().toLocaleTimeString();
+                logDiv.innerHTML += `<div>[${time}] ${msg}</div>`;
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+        }
+
+        // Patch attackEnemy and entityAttack to log damage
+        window.attackEnemy = function (player, skillIndex) {
+            // ...existing code...
+            const target = 'boss';
+            const skill = playerSkills[player][skillIndex];
+            let damage = 0;
+            if (skill.damagePercent) {
+                damage = calculateDamage(player, target, skill.damagePercent, skill.flatdamage, skill.magPercentDamage || 0, skill.defIgnore || 0);
+            } else if (skill.damage) {
+                damage = skill.damage;
+            }
+            if (damage > 0) {
+                appendDamageLog(`${player} used ${skill.name} on Boss: ${damage} damage${window.critActive ? " (CRIT!)" : ""}`);
+            }
+            originalAttackEnemy(player, skillIndex);
+        };
+
+        const originalEntityAttack = window.entityAttack;
+        window.entityAttack = function (skillIndex) {
+            // ...existing code...
+            const bossSelect = document.getElementById('preset-entity');
+            const selectedPreset = bossSelect ? bossSelect.value : 'Bathala';
+            const skills = bossSkills[selectedPreset];
+            if (!skills || !skills[skillIndex]) return;
+            const skill = skills[skillIndex];
+            const target = document.getElementById('entity-target').value;
+
+            // If skill is for all players, apply to all
+            if (skill.description.includes('all players')) {
+                ['player1', 'player2', 'player3', 'player4'].forEach(p => {
+                    const damage = calculateDamage('boss', p, skill.damagePercent || 0, skill.magPercentDamage || 0);
+                    appendDamageLog(`Boss (${selectedPreset}) used ${skill.name} on ${p}: ${damage} damage${window.critActive ? " (CRIT!)" : ""}`);
+                });
+            } else if (!(selectedPreset === 'Mayari' && skill.healPercent)) {
+                const damage = calculateDamage('boss', target, skill.damagePercent || 0, skill.magPercentDamage || 0);
+                appendDamageLog(`Boss (${selectedPreset}) used ${skill.name} on ${target}: ${damage} damage${window.critActive ? " (CRIT!)" : ""}`);
+            }
+            originalEntityAttack(skillIndex);
+        };
+
+        // ...existing code...
+    </script>
+</body>
+
+</html>
