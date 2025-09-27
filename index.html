@@ -15,11 +15,31 @@
         <button onclick="endRound()">End Round</button>
         <span>Cooldowns reduce by 1 each round.</span>
         <div style="margin-bottom:10px;">
-            <label>
-                <input type="checkbox" id="crit-checkbox" onchange="window.critActive=this.checked;">
-                Critical Hit(150% Damage)
-            </label>
-            
+            <div class="buff-controls">
+                <label>
+                    <input type="checkbox" id="crit-checkbox" onchange="window.critActive=this.checked;">
+                    Critical Hit (+50% DMG)
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" id="dungeon-buff1-checkbox"
+                        onchange="window.dungeonBuff1Active=this.checked;">
+                    Dagat ng Kabisayaan (+15% DMG to all)
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" id="dungeon-buff2-checkbox"
+                        onchange="window.dungeonBuff2Active=this.checked;">
+                    Daragang Magayon (+25% DEF to all players)
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" id="dungeon-buff3-checkbox"
+                        onchange="window.dungeonBuff3Active=this.checked;">
+                    Bundok Pulag (No Cooldown for all skills)
+                </label>
+            </div>
+
         </div>
         <div class="player-container">
             <h2>Mandirigma</h2>
@@ -30,10 +50,12 @@
                     <option value="bruiser">Bruiser</option>
                     <option value="berserker">Berserker</option>
                 </select>
-                <label for="target-player1">Select Target:</label>
-                <select id="target-player1">
+                <br>
+                <label for="enemy-target-player1">Attack Target:</label>
+                <select id="enemy-target-player1">
                     <option value="boss">Boss</option>
                 </select>
+                <!-- Mandirigma doesn't need ally targeting since no support skills -->
                 <label style="margin-left:8px;">
                     <input type="checkbox" id="mandirigma-rage-checkbox"
                         onchange="window.mandirigmaRageActive=this.checked;window.mandirigmaRageDefIgnore=this.checked?0.2:0;">
@@ -73,18 +95,23 @@
                     <option value="juggernaut">Juggernaut</option>
                     <option value="damageSoaker">Damage Soaker</option>
                 </select>
-                <label for="target-player2">Select Target:</label>
-                <select id="target-player2">
+                <br>
+                <label for="enemy-target-player2">Attack Target:</label>
+                <select id="enemy-target-player2">
+                    <option value="boss">Boss</option>
+                </select>
+                <label for="ally-target-player2">Support Target:</label>
+                <select id="ally-target-player2">
                     <option value="player1">Mandirigma</option>
                     <option value="player2">Bagani</option>
                     <option value="player3">Babaylan</option>
                     <option value="player4">Mangangayaw</option>
                 </select>
                 <label style="margin-left:16px;">
-                <input type="checkbox" id="bagani-laststand-checkbox"
-                    onchange="window.baganiLastStandActive=this.checked;">
-                Bagani Last Stand (+50% DEF)
-            </label>
+                    <input type="checkbox" id="bagani-laststand-checkbox"
+                        onchange="window.baganiLastStandActive=this.checked;">
+                    Bagani Last Stand (+50% DEF)
+                </label>
             </div>
             <div class="hp-bar">
                 <div class="hp-fill" id="hp-player2" style="width: 100%;"></div>
@@ -119,8 +146,13 @@
                     <option value="supportCleric">Support Cleric</option>
                     <option value="battlePriest">Battle Priest</option>
                 </select>
-                <label for="target-player3">Select Target:</label>
-                <select id="target-player3">
+                <br>
+                <label for="enemy-target-player3">Attack Target:</label>
+                <select id="enemy-target-player3">
+                    <option value="boss">Boss</option>
+                </select>
+                <label for="ally-target-player3">Support Target:</label>
+                <select id="ally-target-player3">
                     <option value="player1">Mandirigma</option>
                     <option value="player2">Bagani</option>
                     <option value="player3">Babaylan</option>
@@ -164,8 +196,9 @@
                     <option value="ranger">Ranger</option>
                     <option value="hunter">Hunter</option>
                 </select>
-                <label for="target-player4">Select Target:</label>
-                <select id="target-player4">
+                <br>
+                <label for="enemy-target-player4">Attack Target:</label>
+                <select id="enemy-target-player4">
                     <option value="boss">Boss</option>
                 </select>
             </div>
@@ -288,15 +321,15 @@
 
         // Update player buttons to show skill names from playerSkills
         function updatePlayerSkillButtons() {
-            var playerIds = ['player1','player2','player3','player4'];
+            var playerIds = ['player1', 'player2', 'player3', 'player4'];
             var playerContainers = document.querySelectorAll('.players-container .player-container');
-            playerIds.forEach(function(pid, idx) {
+            playerIds.forEach(function (pid, idx) {
                 var container = playerContainers[idx];
                 if (!container) return;
                 var skillDivs = container.querySelectorAll('.skills .skill');
                 var skills = (typeof playerSkills !== 'undefined') ? playerSkills[pid] : null;
                 if (!skills) return;
-                skills.forEach(function(skill, sidx) {
+                skills.forEach(function (skill, sidx) {
                     var skillDiv = skillDivs[sidx];
                     if (!skillDiv) return;
                     var btn = skillDiv.querySelector('button');
@@ -314,6 +347,8 @@
             applyPreset('boss');
             updateBossSkillButtons();
             updatePlayerSkillButtons();
+            updateBossUI();
+            updatePlayerTargetDropdowns();
             if (typeof updateAllSkillCooldownDescriptions === 'function') {
                 updateAllSkillCooldownDescriptions();
             }

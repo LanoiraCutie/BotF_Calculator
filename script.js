@@ -3,7 +3,8 @@ const playersStats = {
     player2: { hp: 100, atk: 25, def: 15 },
     player3: { hp: 100, atk: 30, def: 20 },
     player4: { hp: 100, atk: 35, def: 25 },
-    boss: { hp: 200, atk: 50, mag: 50, def: 30 } // Added mag
+    boss: { hp: 200, atk: 50, mag: 50, def: 30 },
+    boss2: { hp: 0, atk: 0, mag: 0, def: 0, maxHp: 0 }
 };
 
 const presets = {
@@ -32,7 +33,7 @@ const presets = {
         Mayari: { hp: 2100, atk: 300, mag: 120, def: 180 },
         Apolaki: { hp: 1700, atk: 360, mag: 70, def: 150 },
         Bakunawa: { hp: 2000, atk: 40, mag: 300, def: 190 },
-        Minokawa: { hp: 1700 /*plc*/, atk: 300, mag: 40, def: 190 }, // Total HP: Inherit from Bakunawa (See Bakunawa: Eat the Sun and Moon)
+        Minokawa: { hp: 2000, atk: 300, mag: 40, def: 190 }, // Total HP: Inherit from Bakunawa (See Bakunawa: Eat the Sun and Moon)
         Manananggal: { hp: 900, atk: 230, mag: 35, def: 100 },      // Assassin Type
         Tiyanak: { hp: 1150, atk: 50, mag: 195, def: 125 },         // Trickster
         Siren: { hp: 1000, atk: 20, mag: 240, def: 80 },            // Mage
@@ -164,47 +165,49 @@ const bossSkills = {
         { name: "Sunburst Nova (AoE Burst)", damagePercent: 1, magPercentDamage: 1.25, dmgMultiplier: 1.2, hitsAll: true, description: "Deals 1.2x(100% ATK + 125% MAG), dealing AOE damage to all enemies." }
     ],
     Bakunawa: [
-        { name: "Serpent Bite", damagePercent: 0.85, magPercentDamage: 0.15, description: "Deals 85% ATK + 15% MAG to a player." },
-        { name: "Tidal Wave", damagePercent: 0.65, magPercentDamage: 0.35, description: "Deals 65% ATK + 35% MAG to all players." },
-        { name: "Devour", damagePercent: 1.15, magPercentDamage: 0.25, description: "Deals 115% ATK + 25% MAG to a player." },
-        { name: "Abyssal Roar", damagePercent: 1.05, magPercentDamage: 0.45, description: "Deals 105% ATK + 45% MAG to all players." }
+        { name: "Eclipse Fang (Damage, Lifesteal)", healFrom_mag: 50, healFrom_magPerc: 1, magPercentDamage: 1.10, description: "Deals 110% MAG as damage to a single target, heals itself for 50 (+100%) MAG." },
+        { name: "Serpent’s Coil (Debuff, Slight Damage)", bind_debuff: true, reduce_enemyDEF: 0.15, duration: 2, flatdamage: 50, damagePercent: 1.5, description: "Deal 50 (+150%) ATK damage, binds enemy" },
+        { name: "Lunar Devour (AoE, Debuff)", magPercentDamage: 0.8, hitsAll: true, devoured_debuff: true, devoured_dot_magperc: 0.2, duration: 2, description: "Deal 80% MAG to all enemies. Each enemy hit gets Devoured." },
+        { name: "Shadow Dive (Counter)", strengthened: true, strengthened_attack_num: 1, strengthened_attack_mult: 2, description: "Bakunawa will recharge its inner magical power, next attack deals double damage." }
     ],
     Minokawa: [ 
-        { name: "Serpent Bite", damagePercent: 0.85, magPercentDamage: 0.15, description: "Deals 85% ATK + 15% MAG to a player." },
-        { name: "Tidal Wave", damagePercent: 0.65, magPercentDamage: 0.35, description: "Deals 65% ATK + 35% MAG to all players." },
-        { name: "Devour", damagePercent: 1.15, magPercentDamage: 0.25, description: "Deals 115% ATK + 25% MAG to a player." },
-        { name: "Abyssal Roar", damagePercent: 1.05, magPercentDamage: 0.45, description: "Deals 105% ATK + 45% MAG to all players." }
+        { name: "Solar Devour (Single Damage)", damagePercent: 0.9, defIgnore: 0.1, description: "Deal 90% ATK, ignore 10% DEF." },
+        { name: "Wing Tempest (AOE Damage)", damagePercent: 0.8, hitsAll: true, eye_dragon: true, duration: 2, reduce_enemyDEF: 0.1, description: "Deals 80% ATK damage to all enemies. Each target that are hit by this gets inflicted by Eye of the Dragon" },
+        { name: "Brave Slash (Magic AOE)", damagePercent: 0.8, magPercentDamage: 1, hitsAll: true, description: "Create a powerful air slash, dealing 80% ATK + 100% MAG." },
+        { name: "Sky’s Wrath (Single Damage, Heal)", damagePercent: 1.8, maxHp_heal_if_defeatedhero: 0.2, description: "Deals 180% ATK to one target, if the target is defeated, it heals itself 20% of its max HP" }
     ],
     Manananggal: [
-        { name: "Batwing Slash", damagePercent: 1.2, magPercentDamage: 0, description: "Deals 1.2x ATK to one enemy." },
-        { name: "Blood Splash", damagePercent: 1.5, magPercentDamage: 0, description: "Deals 1.5x ATK to single enemies." },
-        { name: "Split Body", damagePercent: 1.6, magPercentDamage: 0, description: "Deals 1.6x ATK to all enemies." }
+        { name: "Batwing Slash", damagePercent: 1.2, description: "Deals 1.2x ATK to one enemy." },
+        { name: "Blood Splash", damagePercent: 1.5, description: "Deals 1.5x ATK to single enemies." },
+        { name: "Split Body", damagePercent: 1.6, hitsAll: true, description: "Deals 1.6x ATK to all enemies." }
     ],
     Tiyanak: [
-        { name: "Claw Latch", damagePercent: 0, magPercentDamage: 1.2, description: "Deals 1.2x MAG to one enemy." },
-        { name: "Blood Hex", damagePercent: 0, magPercentDamage: 1.5, description: "Deals 1.5x MAG to single enemies." },
-        { name: "Demonic Wail", damagePercent: 0, magPercentDamage: 1.6, description: "Deals 1.6x MAG to all enemies." }
+        { name: "Claw Latch", magPercentDamage: 1.2, description: "Deals 1.2x MAG to one enemy." },
+        { name: "Blood Hex", magPercentDamage: 1.5, description: "Deals 1.5x MAG to single enemies." },
+        { name: "Demonic Wail", magPercentDamage: 1.6, hitsAll: true, description: "Deals 1.6x MAG to all enemies." }
     ],
     Siren: [
-        { name: "Drowning Current", damagePercent: 0, magPercentDamage: 1.2, description: "Deals 1.2x MAG to one enemy." },
-        { name: "Tidal Surge", damagePercent: 0, magPercentDamage: 1.5, description: "Deals 1.5x MAG to single enemies." },
-        { name: "Moonlight Hymn", damagePercent: 0, magPercentDamage: 1.6, description: "Deals 1.6x MAG to all enemies." }
+        { name: "Drowning Current", magPercentDamage: 1.2, description: "Deals 1.2x MAG to one enemy." },
+        { name: "Tidal Surge", magPercentDamage: 1.5, description: "Deals 1.5x MAG to single enemies." },
+        { name: "Moonlight Hymn", magPercentDamage: 1.6, hitsAll: true, description: "Deals 1.6x MAG to all enemies." }
     ],
     Kapre: [
-        { name: "Tree Smash", damagePercent: 1.2, magPercentDamage: 0, description: "Deals 1.2x ATK to one enemy." },
-        { name: "Uproot Smash", damagePercent: 1.5, magPercentDamage: 0, description: "Deals 1.5x ATK to single enemies." },
-        { name: "Forest Wrath", damagePercent: 1.6, magPercentDamage: 0, description: "Deals 1.6x ATK to all enemies." }
+        { name: "Tree Smash", damagePercent: 1.2, description: "Deals 1.2x ATK to one enemy." },
+        { name: "Uproot Smash", damagePercent: 1.5, description: "Deals 1.5x ATK to single enemies." },
+        { name: "Forest Wrath", damagePercent: 1.6, hitsAll: true, description: "Deals 1.6x ATK to all enemies." }
     ]
 
 };
 // Expose bossSkills and playersStats to global scope for HTML dynamic updates
 window.bossSkills = bossSkills;
 window.playersStats = playersStats;
+window.bakunawaPhase2Active = false;
 
 // Global crit flag
 window.critActive = false;
 
 // Global buff flags
+window.deadEntities = new Set(); // tracks which entities are dead
 window.critActive = false;
 window.bathalaMandateBuff = { turnsLeft: 0, defIncrease: 0 };
 window.baganiLastStandActive = false;
@@ -213,8 +216,15 @@ window.mandirigmaRageDefIgnore = 0;
 window.blessingBuff = {}; // blessingBuff[playerId] = remainingTurns
 window.focusAimBuff = {};  // focusAimBuff[playerId] = { attacksLeft, defIgnore }
 window.moonfallDebuffs = {}; // moonfallDebuffs[playerId] = remainingTurns
+window.bindDebuffs = {}; // bindDebuffs[playerId] = { turnsLeft, defReduce }
+window.devouredDebuffs = {}; // devouredDebuffs[playerId] = { turnsLeft, dotMagPerc }
+window.strengthenedBuff = {}; // strengthenedBuff[bossId] = { attacksLeft, multiplier }
 window.bossInvulnerable = { turnsLeft: 0 };
 window.daybreakFuryBuff = { turnsLeft: 0, atkIncrease: 0, defIgnore: 0 };
+window.eyeDragonDebuffs = {}; // eyeDragonDebuffs[playerId] = { turnsLeft, defReduce }
+window.dungeonBuff1Active = false; // +15% DMG to all players
+window.dungeonBuff2Active = false; // +25% DEF to all players  
+window.dungeonBuff3Active = false; // No cooldown for all skills
 
 function cleanseBossDebuffs() {
     // Remove any DEF-reducing or negative flags applied to boss
@@ -225,7 +235,335 @@ function cleanseBossDebuffs() {
     console.log("Boss debuffs cleansed.");
 }
 
+function checkBakunawaPhase() {
+    if (window.bakunawaPhase2Active) return;
+    
+    const bossSelect = document.getElementById('preset-entity');
+    const selectedPreset = bossSelect ? bossSelect.value : '';
+    if (selectedPreset !== 'Bakunawa') return;
+    
+    const bakunawaHp = playersStats.boss.hp || 0;
+    const bakunawaMaxHp = playersStats.boss.maxHp || playersStats.boss.hp || 1;
+    const threshold = bakunawaMaxHp * 0.5;
+    
+    console.log(`DEBUG: Checking phase - HP: ${bakunawaHp}, Max: ${bakunawaMaxHp}, 50% threshold: ${threshold}`);
+    
+    if (bakunawaHp <= threshold && bakunawaHp > 0) {
+        console.log('DEBUG: Phase 2 should trigger now!');
+        window.bakunawaPhase2Active = true;
+        
+        const minokawaHp = Math.round(bakunawaHp * 0.5);
+        playersStats.boss2 = {
+            hp: minokawaHp,
+            maxHp: bakunawaMaxHp,
+            atk: playersStats.boss.atk || 0,
+            mag: playersStats.boss.mag || 0,
+            def: playersStats.boss.def || 0
+        };
+        
+        const healAmount = Math.round(bakunawaMaxHp * 0.2);
+        playersStats.boss.hp = Math.min(bakunawaMaxHp, playersStats.boss.hp + healAmount);
+        playersStats.boss2.hp = Math.min(bakunawaMaxHp, playersStats.boss2.hp + healAmount);
+        
+        console.log(`Phase 2: Minokawa spawned with ${minokawaHp} HP! Both bosses healed for ${healAmount}.`);
+        
+        // Update UI and targeting
+        updateBossUI();
+        updatePlayerTargetDropdowns();
+        return true;
+    }
+    return false;
+}
+
+function updateBossUI() {
+    const bossContainer = document.querySelector('.boss-container');
+    if (!bossContainer) return;
+    
+    const existingPresetSelect = bossContainer.querySelector('#preset-entity');
+    const currentPreset = existingPresetSelect ? existingPresetSelect.value : 'Bakunawa';
+    
+    if (window.bakunawaPhase2Active) {
+        // Phase 2: Show both bosses with their skills
+        bossContainer.innerHTML = `
+            <h2>Bakunawa</h2>
+            <label for="preset-entity">Select Preset:</label>
+            <select id="preset-entity" onchange="applyPreset('boss')">
+                <option value="Bathala" ${currentPreset === 'Bathala' ? 'selected' : ''}>Bathala</option>
+                <option value="Mayari" ${currentPreset === 'Mayari' ? 'selected' : ''}>Mayari</option>
+                <option value="Apolaki" ${currentPreset === 'Apolaki' ? 'selected' : ''}>Apolaki</option>
+                <option value="Bakunawa" ${currentPreset === 'Bakunawa' ? 'selected' : ''}>Bakunawa</option>
+                <option value="Manananggal" ${currentPreset === 'Manananggal' ? 'selected' : ''}>Manananggal</option>
+                <option value="Tiyanak" ${currentPreset === 'Tiyanak' ? 'selected' : ''}>Tiyanak</option>
+                <option value="Siren" ${currentPreset === 'Siren' ? 'selected' : ''}>Siren</option>
+                <option value="Kapre" ${currentPreset === 'Kapre' ? 'selected' : ''}>Kapre</option>
+            </select>
+            <div class="hp-bar">
+                <div class="hp-fill" id="hp-boss"></div>
+            </div>
+            <div class="stats">
+                <div class="stat">HP: <span id="stats-hp-boss">${playersStats.boss.hp}</span></div>
+                <div class="stat">ATK: <span id="stats-atk-boss">${playersStats.boss.atk}</span></div>
+                <div class="stat">MAG: <span id="stats-mag-boss">${playersStats.boss.mag}</span></div>
+                <div class="stat">DEF: <span id="stats-def-boss">${playersStats.boss.def}</span></div>
+            </div>
+            
+            <label for="entity-target">Target:</label>
+            <select id="entity-target">
+                <option value="player1">Player 1</option>
+                <option value="player2">Player 2</option>
+                <option value="player3">Player 3</option>
+                <option value="player4">Player 4</option>
+            </select>
+            
+            <div class="skills" id="bakunawa-skills">
+                <h3>Bakunawa Skills</h3>
+            </div>
+            
+            <h2>Minokawa</h2>
+            <div class="hp-bar">
+                <div class="hp-fill" id="hp-boss2"></div>
+            </div>
+            <div class="stats">
+                <div class="stat">HP: <span id="stats-hp-boss2">${playersStats.boss2.hp}</span></div>
+                <div class="stat">ATK: <span id="stats-atk-boss2">${playersStats.boss2.atk}</span></div>
+                <div class="stat">MAG: <span id="stats-mag-boss2">${playersStats.boss2.mag}</span></div>
+                <div class="stat">DEF: <span id="stats-def-boss2">${playersStats.boss2.def}</span></div>
+            </div>
+            
+            <label for="minokawa-target">Target:</label>
+            <select id="minokawa-target">
+                <option value="player1">Player 1</option>
+                <option value="player2">Player 2</option>
+                <option value="player3">Player 3</option>
+                <option value="player4">Player 4</option>
+            </select>
+            
+            <div class="skills" id="minokawa-skills">
+                <h3>Minokawa Skills</h3>
+            </div>
+            
+            <div id="damage-log"></div>
+        `;
+        
+        // Add Bakunawa skills
+        const bakunawaSkillsContainer = document.getElementById('bakunawa-skills');
+        const bakunawaSkills = window.bossSkills['Bakunawa'] || [];
+        bakunawaSkills.forEach((skill, index) => {
+            const skillDiv = document.createElement('div');
+            skillDiv.className = 'skill';
+            skillDiv.innerHTML = `
+                <button onclick="entityAttack(${index})">${skill.name}</button>
+                <div class="skill-description">${skill.description}</div>
+            `;
+            bakunawaSkillsContainer.appendChild(skillDiv);
+        });
+        
+        // Add Minokawa skills
+        const minokawaSkillsContainer = document.getElementById('minokawa-skills');
+        const minokawaSkills = window.bossSkills['Minokawa'] || [];
+        minokawaSkills.forEach((skill, index) => {
+            const skillDiv = document.createElement('div');
+            skillDiv.className = 'skill';
+            skillDiv.innerHTML = `
+                <button onclick="minokawaAttack(${index})">${skill.name}</button>
+                <div class="skill-description">${skill.description}</div>
+            `;
+            minokawaSkillsContainer.appendChild(skillDiv);
+        });
+        
+    } else {
+        // Phase 1: Single boss
+        bossContainer.innerHTML = `
+            <h2>Boss</h2>
+            <label for="preset-entity">Select Preset:</label>
+            <select id="preset-entity" onchange="applyPreset('boss')">
+                <option value="Bathala" ${currentPreset === 'Bathala' ? 'selected' : ''}>Bathala</option>
+                <option value="Mayari" ${currentPreset === 'Mayari' ? 'selected' : ''}>Mayari</option>
+                <option value="Apolaki" ${currentPreset === 'Apolaki' ? 'selected' : ''}>Apolaki</option>
+                <option value="Bakunawa" ${currentPreset === 'Bakunawa' ? 'selected' : ''}>Bakunawa</option>
+                <option value="Manananggal" ${currentPreset === 'Manananggal' ? 'selected' : ''}>Manananggal</option>
+                <option value="Tiyanak" ${currentPreset === 'Tiyanak' ? 'selected' : ''}>Tiyanak</option>
+                <option value="Siren" ${currentPreset === 'Siren' ? 'selected' : ''}>Siren</option>
+                <option value="Kapre" ${currentPreset === 'Kapre' ? 'selected' : ''}>Kapre</option>
+            </select>
+            <div class="hp-bar">
+                <div class="hp-fill" id="hp-boss"></div>
+            </div>
+            <div class="stats">
+                <div class="stat">HP: <span id="stats-hp-boss">${playersStats.boss.hp}</span></div>
+                <div class="stat">ATK: <span id="stats-atk-boss">${playersStats.boss.atk}</span></div>
+                <div class="stat">MAG: <span id="stats-mag-boss">${playersStats.boss.mag}</span></div>
+                <div class="stat">DEF: <span id="stats-def-boss">${playersStats.boss.def}</span></div>
+            </div>
+            
+            <label for="entity-target">Target:</label>
+            <select id="entity-target">
+                <option value="player1">Player 1</option>
+                <option value="player2">Player 2</option>
+                <option value="player3">Player 3</option>
+                <option value="player4">Player 4</option>
+            </select>
+            
+            <div class="skills">
+            </div>
+            
+            <div id="damage-log"></div>
+        `;
+        
+        // Add single boss skills
+        const skillsContainer = bossContainer.querySelector('.skills');
+        const skills = window.bossSkills[currentPreset] || [];
+        skills.forEach((skill, index) => {
+            const skillDiv = document.createElement('div');
+            skillDiv.className = 'skill';
+            skillDiv.innerHTML = `
+                <button onclick="entityAttack(${index})">${skill.name}</button>
+                <div class="skill-description">${skill.description}</div>
+            `;
+            skillsContainer.appendChild(skillDiv);
+        });
+    }
+    
+    // Update HP bars
+    updateHPAndShieldUI('boss');
+    if (window.bakunawaPhase2Active) {
+        updateHPAndShieldUI('boss2');
+    }
+}
+
+function minokawaAttack(skillIndex) {
+    if (isDead('boss2')) {
+        console.log('Minokawa cannot act: entity is dead.');
+        return;
+    }
+
+    const target = document.getElementById('minokawa-target')?.value || 'player1';
+    const skills = bossSkills['Minokawa'];
+    if (!skills || !skills[skillIndex]) {
+        console.log('Minokawa skill not found, index:', skillIndex);
+        return;
+    }
+    const skill = skills[skillIndex];
+    
+    // Wing Tempest - AoE damage + Eye of the Dragon debuff
+    if (skill.eye_dragon) {
+        ['player1','player2','player3','player4'].forEach(p => {
+            const dmg = calculateDamage(
+                'boss2',
+                p,
+                skill.damagePercent || 0,
+                skill.flatdamage || 0,
+                skill.magPercentDamage || 0,
+                skill.defIgnore || 0
+            );
+            adjustHP(p, -dmg);
+            
+            // Apply Eye of the Dragon debuff
+            if (!window.eyeDragonDebuffs) window.eyeDragonDebuffs = {};
+            window.eyeDragonDebuffs[p] = {
+                turnsLeft: skill.duration || 2,
+                defReduce: skill.reduce_enemyDEF || 0.1
+            };
+            
+            console.log(`Minokawa used ${skill.name} on ${p}: Dealt ${dmg} damage and applied Eye of the Dragon (-${(window.eyeDragonDebuffs[p].defReduce * 100)}% DEF) for ${window.eyeDragonDebuffs[p].turnsLeft} turns.`);
+        });
+        return;
+    }
+
+    // Sky's Wrath - damage + conditional heal if target dies
+    if (skill.maxHp_heal_if_defeatedhero) {
+        const originalHP = playersStats[target].hp || 0;
+        
+        const dmg = calculateDamage(
+            'boss2',
+            target,
+            skill.damagePercent || 0,
+            skill.flatdamage || 0,
+            skill.magPercentDamage || 0,
+            skill.defIgnore || 0
+        );
+        
+        adjustHP(target, -dmg);
+        console.log(`Minokawa used ${skill.name} on ${target}: Dealt ${dmg} damage.`);
+        
+        // Check if target was defeated (HP reduced to 0)
+        const newHP = playersStats[target].hp || 0;
+        if (originalHP > 0 && newHP <= 0) {
+            const minokawaMaxHp = playersStats.boss2.maxHp || 1;
+            const healAmount = Math.round(minokawaMaxHp * (skill.maxHp_heal_if_defeatedhero || 0));
+            adjustHP('boss2', healAmount);
+            console.log(`${target} was defeated! Minokawa healed for ${healAmount} HP (${(skill.maxHp_heal_if_defeatedhero * 100)}% max HP).`);
+        }
+        return;
+    }
+
+    // Generic damage handling (Solar Devour, Brave Slash)
+    const applyDamage = (victim) => {
+        const dmg = calculateDamage(
+            'boss2',
+            victim,
+            skill.damagePercent || 0,
+            skill.flatdamage || 0,
+            skill.magPercentDamage || 0,
+            skill.defIgnore || 0  // Solar Devour has defIgnore: 0.1
+        );
+        adjustHP(victim, -dmg);
+        console.log(`Minokawa used ${skill.name} on ${victim}: ${skill.description} (Dealt ${dmg})`);
+    };
+
+    if (skill.hitsAll) {
+        ['player1','player2','player3','player4'].forEach(applyDamage);
+    } else {
+        applyDamage(target);
+    }
+}
+
 // Functions to handle buff/debuff durations
+function tickEyeDragonDebuffs() {
+    if (!window.eyeDragonDebuffs) return;
+    Object.keys(window.eyeDragonDebuffs).forEach(p => {
+        window.eyeDragonDebuffs[p].turnsLeft = Math.max(0, (window.eyeDragonDebuffs[p].turnsLeft || 0) - 1);
+        if (window.eyeDragonDebuffs[p].turnsLeft <= 0) {
+            delete window.eyeDragonDebuffs[p];
+            console.log(`Eye of the Dragon debuff expired on ${p}.`);
+        }
+    });
+}
+
+function tickBindDebuffs() {
+    if (!window.bindDebuffs) return;
+    Object.keys(window.bindDebuffs).forEach(p => {
+        window.bindDebuffs[p].turnsLeft = Math.max(0, (window.bindDebuffs[p].turnsLeft || 0) - 1);
+        if (window.bindDebuffs[p].turnsLeft <= 0) {
+            delete window.bindDebuffs[p];
+            console.log(`Bind debuff expired on ${p}.`);
+        }
+    });
+}
+
+function tickDevouredDebuffs() {
+    if (!window.devouredDebuffs) return;
+    const bossMag = playersStats.boss.mag || 0;
+    
+    Object.keys(window.devouredDebuffs).forEach(p => {
+        const debuff = window.devouredDebuffs[p];
+        
+        // Apply DoT damage
+        const dotDamage = Math.round(bossMag * (debuff.dotMagPerc || 0));
+        if (dotDamage > 0) {
+            adjustHP(p, -dotDamage);
+            console.log(`${p} takes ${dotDamage} Devoured DoT damage.`);
+        }
+        
+        // Tick down duration
+        debuff.turnsLeft = Math.max(0, (debuff.turnsLeft || 0) - 1);
+        if (debuff.turnsLeft <= 0) {
+            delete window.devouredDebuffs[p];
+            console.log(`Devoured debuff expired on ${p}.`);
+        }
+    });
+}
+
 function tickDaybreakFuryBuff() {
     if (!window.daybreakFuryBuff) return;
     if (window.daybreakFuryBuff.turnsLeft > 0) {
@@ -335,7 +673,23 @@ window.calculateDamage = function (
         def = Math.round(def * 1.5);
     }
 
+    if (target !== 'boss' && target !== 'boss2' && window.dungeonBuff2Active) {
+        def = Math.round(def * 1.25);
+    }
+
+
     // DEF reductions
+    // Eye of the Dragon debuff (DEF reduction)
+    if (target !== 'boss' && target !== 'boss2' && window.eyeDragonDebuffs && window.eyeDragonDebuffs[target]) {
+        const red = window.eyeDragonDebuffs[target].defReduce || 0;
+        def = def * (1 - red);
+    }
+
+    // Bind debuff (DEF reduction)
+    if (target !== 'boss' && window.bindDebuffs && window.bindDebuffs[target]) {
+        const red = window.bindDebuffs[target].defReduce || 0;
+        def = def * (1 - red);
+    }
 
     // Moonfall debuff
     if (target !== 'boss' && window.moonfallDebuffs && window.moonfallDebuffs[target]) {
@@ -384,6 +738,20 @@ window.calculateDamage = function (
             dmg = atkDamage + magDamage;
         }
 
+        // Apply strengthened buff (before final rounding)
+        if (window.strengthenedBuff && window.strengthenedBuff[attacker] && window.strengthenedBuff[attacker].attacksLeft > 0) {
+            const mult = window.strengthenedBuff[attacker].multiplier || 1;
+            dmg *= mult;
+            
+            // Consume one attack
+            window.strengthenedBuff[attacker].attacksLeft -= 1;
+            if (window.strengthenedBuff[attacker].attacksLeft <= 0) {
+                delete window.strengthenedBuff[attacker];
+            }
+            
+            console.log(`Strengthened buff applied: damage multiplied by ${mult}`);
+        }
+
         dmg = Math.max(1, Math.round(dmg));
     } else {
         const attackerATK = playersStats[attacker].mag || playersStats[attacker].atk;
@@ -396,6 +764,9 @@ window.calculateDamage = function (
         // Mandirigma Rage +50% (applied pre-mitigation)
         if (rageActive) {
             numerator *= 1.5;
+        }
+        if (window.dungeonBuff1Active) {
+            numerator *= 1.15;
         }
 
         dmg = numerator / (1 + def * 0.01);
@@ -412,6 +783,8 @@ window.calculateDamage = function (
     if (window.critActive) logMsg += " [CRIT]";
     if (dmgMultiplier !== 1 && attacker === 'boss') logMsg += ` [Multiplier x${dmgMultiplier}]`;
     if (daybreakActive) logMsg += ' [Daybreak Fury]';
+    if (window.dungeonBuff1Active && attacker !== 'boss') logMsg += ' [Dungeon Buff +15% DMG]';
+    if (window.dungeonBuff2Active && target !== 'boss' && target !== 'boss2') logMsg += ' [Dungeon Buff +25% DEF]';
     console.log(logMsg);
 
     return dmg;
@@ -447,6 +820,11 @@ function getSkillKey(player, skillIndex) {
 }
 
 function isOnCooldown(player, skillKey) {
+    // Dungeon Buff 3: No cooldowns for all skills
+    if (window.dungeonBuff3Active) {
+        return false;
+    }
+    
     const remain = cooldowns[player]?.[skillKey] || 0;
     return remain > 0;
 }
@@ -459,6 +837,8 @@ function startCooldown(player, skillKey, durationRounds = 2) {
 function endRound() {
     currentRound += 1;
     ['player1', 'player2', 'player3', 'player4'].forEach(p => {
+        if (isDead(p)) return;
+
         const map = cooldowns[p] || {};
         Object.keys(map).forEach(key => {
             map[key] = Math.max(0, (map[key] || 0) - 1);
@@ -472,10 +852,43 @@ function endRound() {
     tickBathalaMandateBuff();
     tickMoonfallDebuffs();
     tickDaybreakFuryBuff();
+    tickBindDebuffs();
+    tickDevouredDebuffs();
+    tickEyeDragonDebuffs();
     console.log(`Round ${currentRound} started. Cooldowns decremented.`);
     updateAllSkillCooldownDescriptions();
     const rc = document.getElementById('round-counter');
     if (rc) rc.innerText = String(currentRound);
+}
+
+function updatePlayerTargetDropdowns() {
+    ['player1', 'player2', 'player3', 'player4'].forEach(player => {
+        const targetSelect = document.getElementById(`target-${player}`);
+        if (!targetSelect) return;
+        
+        const currentValue = targetSelect.value;
+        
+        if (window.bakunawaPhase2Active) {
+            // Phase 2: Add boss2 as targeting option
+            targetSelect.innerHTML = `
+                <option value="player1" ${currentValue === 'player1' ? 'selected' : ''}>Player 1</option>
+                <option value="player2" ${currentValue === 'player2' ? 'selected' : ''}>Player 2</option>
+                <option value="player3" ${currentValue === 'player3' ? 'selected' : ''}>Player 3</option>
+                <option value="player4" ${currentValue === 'player4' ? 'selected' : ''}>Player 4</option>
+                <option value="boss" ${currentValue === 'boss' ? 'selected' : ''}>Bakunawa</option>
+                <option value="boss2" ${currentValue === 'boss2' ? 'selected' : ''}>Minokawa</option>
+            `;
+        } else {
+            // Phase 1: Normal targeting
+            targetSelect.innerHTML = `
+                <option value="player1" ${currentValue === 'player1' ? 'selected' : ''}>Player 1</option>
+                <option value="player2" ${currentValue === 'player2' ? 'selected' : ''}>Player 2</option>
+                <option value="player3" ${currentValue === 'player3' ? 'selected' : ''}>Player 3</option>
+                <option value="player4" ${currentValue === 'player4' ? 'selected' : ''}>Player 4</option>
+                <option value="boss" ${currentValue === 'boss' ? 'selected' : ''}>Boss</option>
+            `;
+        }
+    });
 }
 
 function getRemainingCooldown(player, skillIndex) {
@@ -558,6 +971,15 @@ function applyPreset(player) {
     if (player === 'boss') {
         const bossSelect = document.getElementById('preset-entity');
         selectedPreset = bossSelect ? bossSelect.value : 'preset1';
+        
+        // Reset phase 2 when changing boss (unless staying on Bakunawa)
+        if (selectedPreset !== 'Bakunawa' && window.bakunawaPhase2Active) {
+            window.bakunawaPhase2Active = false;
+            playersStats.boss2 = { hp: 0, atk: 0, mag: 0, def: 0, maxHp: 0 };
+            console.log('Phase 2 reset: Minokawa disappeared due to boss change.');
+            // Update targeting back to single boss
+            updatePlayerTargetDropdowns();
+        }
     } else {
         const playerSelect = document.getElementById(`preset-${player}`);
         if (playerSelect) {
@@ -578,10 +1000,9 @@ function applyPreset(player) {
     const hpEl = document.getElementById(`stats-hp-${player}`);
     const atkEl = document.getElementById(`stats-atk-${player}`);
     const defEl = document.getElementById(`stats-def-${player}`);
-    // Add mag display for boss
     const magEl = player === 'boss' ? document.getElementById('stats-mag-boss') : null;
     if (hpEl) hpEl.innerText = newStats.hp;
-    if (atkEl) atkEl.innerText = newStats.atk || newStats.mag || 0; // Handle ATK or MAG
+    if (atkEl) atkEl.innerText = newStats.atk || newStats.mag || 0;
     if (defEl) defEl.innerText = newStats.def;
     if (magEl) magEl.innerText = newStats.mag || 0;
 
@@ -591,8 +1012,49 @@ function applyPreset(player) {
         hpBar.style.width = '100%';
     }
 
+    // Update UI after boss change
+    if (player === 'boss') {
+        updateBossUI();
+    }
+
     // ensure UI elements for shield/hp exist/updated
     updateHPAndShieldUI(player);
+}
+
+// Fix 2: Replace updatePlayerTargetDropdowns with separate ally/enemy targeting
+function updatePlayerTargetDropdowns() {
+    ['player1', 'player2', 'player3', 'player4'].forEach(player => {
+        // Update ally targeting (for heals/buffs)
+        const allySelect = document.getElementById(`ally-target-${player}`);
+        if (allySelect) {
+            const currentValue = allySelect.value;
+            allySelect.innerHTML = `
+                <option value="player1" ${currentValue === 'player1' ? 'selected' : ''}>Mandirigma</option>
+                <option value="player2" ${currentValue === 'player2' ? 'selected' : ''}>Bagani</option>
+                <option value="player3" ${currentValue === 'player3' ? 'selected' : ''}>Babaylan</option>
+                <option value="player4" ${currentValue === 'player4' ? 'selected' : ''}>Mangangayaw</option>
+            `;
+        }
+
+        // Update enemy targeting (for attacks)
+        const enemySelect = document.getElementById(`enemy-target-${player}`);
+        if (enemySelect) {
+            const currentValue = enemySelect.value;
+            
+            if (window.bakunawaPhase2Active) {
+                // Phase 2: Both bosses available
+                enemySelect.innerHTML = `
+                    <option value="boss" ${currentValue === 'boss' ? 'selected' : ''}>Bakunawa</option>
+                    <option value="boss2" ${currentValue === 'boss2' ? 'selected' : ''}>Minokawa</option>
+                `;
+            } else {
+                // Phase 1: Only main boss
+                enemySelect.innerHTML = `
+                    <option value="boss" selected>Boss</option>
+                `;
+            }
+        }
+    });
 }
 
 // Update HP bar and shield overlay
@@ -722,10 +1184,37 @@ function consumeShieldStacks(player, amount) {
     return consumed;
 }
 
+function isDead(entity) {
+    return window.deadEntities.has(entity) || (playersStats[entity]?.hp || 0) <= 0;
+}
+
+function markAsDead(entity) {
+    if (!isDead(entity)) {
+        window.deadEntities.add(entity);
+        console.log(`${entity} has been defeated!`);
+        
+        // Visual indicator (optional)
+        const hpBar = document.getElementById(`hp-${entity}`);
+        if (hpBar) hpBar.style.backgroundColor = '#666'; // Gray out HP bar
+        
+        // Update UI to show dead state
+        const label = document.getElementById(`stats-hp-${entity}`);
+        if (label) label.innerText = '0 (DEAD)';
+    }
+}
+
 function adjustHP(player, change) {
     if (!playersStats[player]) return;
     if (typeof playersStats[player].shield !== 'number') playersStats[player].shield = 0;
     const maxHealth = playersStats[player].maxHp || playersStats[player].hp || 1;
+
+    // Don't heal dead entities (but allow damage for completeness)
+    if (change > 0 && isDead(player)) {
+        console.log(`Cannot heal ${player}: entity is dead.`);
+        return;
+    }
+
+    const originalHP = playersStats[player].hp || 0;
 
     if (change < 0) {
         // incoming damage
@@ -745,8 +1234,35 @@ function adjustHP(player, change) {
         playersStats[player].hp = Math.max(0, Math.min(maxHealth, (playersStats[player].hp || 0) + change));
     }
 
+    // Check for death
+    if (playersStats[player].hp <= 0 && !isDead(player)) {
+        markAsDead(player);
+    }
+
+    // Check for phase transition IMMEDIATELY after HP change for boss
+    if (player === 'boss') {
+        const newHP = playersStats[player].hp || 0;
+        const maxHP = playersStats[player].maxHp || 1;
+        
+        // Check if HP crossed the 50% threshold
+        if (originalHP > maxHP * 0.5 && newHP <= maxHP * 0.5 && newHP > 0) {
+            console.log(`DEBUG: HP crossed threshold! Original: ${originalHP}, New: ${newHP}, Threshold: ${maxHP * 0.5}`);
+            checkBakunawaPhase();
+        }
+    }
+
     // Update UI
     updateHPAndShieldUI(player);
+    
+    // Update numeric label
+    const label = document.getElementById(`stats-hp-${player}`);
+    if (label) {
+        if (isDead(player)) {
+            label.innerText = '0 (DEAD)';
+        } else {
+            label.innerText = playersStats[player].hp;
+        }
+    }
 }
 
 function reduceHPIgnoringShield(player, amount) {
@@ -814,6 +1330,11 @@ function updateEntity() {
 
 // Boss attacks using the selected preset's skills
 function entityAttack(skillIndex) {
+    if (isDead('boss')) {
+        console.log('Boss cannot act: entity is dead.');
+        return;
+    }
+
     const target = document.getElementById('entity-target')?.value || 'player1';
     const bossSelect = document.getElementById('preset-entity');
     const selectedPreset = bossSelect ? bossSelect.value : 'Bathala';
@@ -886,6 +1407,70 @@ function entityAttack(skillIndex) {
         };
         console.log(`Apolaki used ${skill.name}: Sacrificed ${sacAmount} HP. Next turn gain +${(window.daybreakFuryBuff.atkIncrease * 100)}% ATK and ignore ${(window.daybreakFuryBuff.defIgnore * 100)}% DEF.`);
         return;
+    }
+
+    if (selectedPreset === 'Bakunawa') {
+        // Eclipse Fang - damage + heal
+        if (skill.healFrom_mag || skill.healFrom_magPerc) {
+            const dmg = calculateDamage('boss', target, skill.damagePercent || 0, skill.flatdamage || 0, skill.magPercentDamage || 0, skill.defIgnore || 0);
+            adjustHP(target, -dmg);
+            
+            // Heal self
+            const bossMag = playersStats.boss.mag || 0;
+            const healAmount = (skill.healFrom_mag || 0) + Math.round(bossMag * (skill.healFrom_magPerc || 0));
+            adjustHP('boss', healAmount);
+            
+            console.log(`${selectedPreset} used ${skill.name} on ${target}: Dealt ${dmg} damage and healed self for ${healAmount}.`);
+            return;
+        }
+
+        // Serpent's Coil - damage + bind debuff
+        if (skill.bind_debuff) {
+            const dmg = calculateDamage('boss', target, skill.damagePercent || 0, skill.flatdamage || 0, skill.magPercentDamage || 0, skill.defIgnore || 0);
+            adjustHP(target, -dmg);
+            
+            // Apply bind debuff (DEF reduction)
+            if (!window.bindDebuffs) window.bindDebuffs = {};
+            window.bindDebuffs[target] = {
+                turnsLeft: skill.duration || 2,
+                defReduce: skill.reduce_enemyDEF || 0.15
+            };
+            
+            console.log(`${selectedPreset} used ${skill.name} on ${target}: Dealt ${dmg} damage and applied Bind (-${(window.bindDebuffs[target].defReduce * 100)}% DEF) for ${window.bindDebuffs[target].turnsLeft} turns.`);
+            return;
+        }
+
+        // Lunar Devour - AoE damage + devoured DoT
+        if (skill.devoured_debuff) {
+            ['player1','player2','player3','player4'].forEach(p => {
+                const dmg = calculateDamage('boss', p, skill.damagePercent || 0, skill.flatdamage || 0, skill.magPercentDamage || 0, skill.defIgnore || 0);
+                adjustHP(p, -dmg);
+                console.log(`${selectedPreset} used ${skill.name} on ${p}: Dealt ${dmg} damage.`);
+            });
+            
+            // Apply devoured DoT to all players
+            if (!window.devouredDebuffs) window.devouredDebuffs = {};
+            ['player1','player2','player3','player4'].forEach(p => {
+                window.devouredDebuffs[p] = {
+                    turnsLeft: skill.duration || 2,
+                    dotMagPerc: skill.devoured_dot_magperc || 0.2
+                };
+            });
+            
+            console.log(`Applied Devoured to all players: ${(skill.devoured_dot_magperc * 100)}% MAG DoT for ${skill.duration || 2} turns.`);
+            return;
+        }
+
+        // Shadow Dive - strengthened buff for next attack
+        if (skill.strengthened) {
+            if (!window.strengthenedBuff) window.strengthenedBuff = {};
+            window.strengthenedBuff.boss = {
+                attacksLeft: skill.strengthened_attack_num || 1,
+                multiplier: skill.strengthened_attack_mult || 2
+            };
+            console.log(`${selectedPreset} used ${skill.name}: Next ${window.strengthenedBuff.boss.attacksLeft} attack(s) deal ${window.strengthenedBuff.boss.multiplier}x damage.`);
+            return;
+        }
     }
 
     // 3. Damage (AoE or Single)
@@ -980,14 +1565,32 @@ function attackBoss(player, skillIndex) {
 }
 
 function attackEnemy(player, skillIndex) {
+    if (isDead(player)) {
+        console.log(`${player} cannot act: entity is dead.`);
+        return;
+    }
+
     const skillKey = getSkillKey(player, skillIndex);
     if (isOnCooldown(player, skillKey)) {
         console.log(`${player} skill ${skillIndex + 1} is on cooldown (${cooldowns[player][skillKey]} rounds left).`);
         return;
     }
-    const target = 'boss';
+    
     const skill = playerSkills[player][skillIndex];
+    let target;
+    
+    // Determine target based on skill type
+    if (skill && (skill.heal_flat || skill.magPercent_heal || skill.blessing || skill.maxHp_perc || skill.currHP_shield)) {
+        // Support skills - use ally target dropdown
+        const allySelect = document.getElementById(`ally-target-${player}`);
+        target = allySelect ? allySelect.value : player;
+    } else {
+        // Attack skills - use enemy target dropdown  
+        const enemySelect = document.getElementById(`enemy-target-${player}`);
+        target = enemySelect ? enemySelect.value : 'boss';
+    }
 
+    // Focus Aim (self-buff)
     if (skill && skill.focused_aim) {
         window.focusAimBuff[player] = {
             turnsLeft: skill.duration || 2,
@@ -999,28 +1602,29 @@ function attackEnemy(player, skillIndex) {
         return;
     }
 
-    // Healer-style skills (heal_flat + MAG% of MAG) and Sacrifice (Hpflat_sac)
+    // Healing/Support skills
     if (skill && (skill.heal_flat || typeof skill.magPercent_heal === 'number' || skill.Hpflat_sac || skill.self_heal)) {
         const casterStat = playersStats[player]?.mag || playersStats[player]?.atk || 0;
         const healAmount = Math.round((skill.heal_flat || 0) + casterStat * (skill.magPercent_heal || 0));
+        
+        // Self-heal component
         if (skill.self_heal) {
-            const self_healPerc = Number(skill.self_heal) || 0;
-            const self_healAmount = Math.round(self_healPerc * healAmount);
-            adjustHP(player, self_healAmount);
-            console.log(`${player} on ${skill.name}: Healed self for ${self_healAmount}.`);
+            const selfHealPerc = Number(skill.self_heal) || 0;
+            const selfHealAmount = Math.round(selfHealPerc * healAmount);
+            adjustHP(player, selfHealAmount);
+            console.log(`${player} used ${skill.name}: Healed self for ${selfHealAmount}.`);
         }
-        // Sacrifice: consume Hpflat_sac from caster ignoring shield, then heal all allies
+        
+        // Sacrifice: consume HP then heal all allies
         if (skill.Hpflat_sac) {
             const sac = Math.abs(skill.Hpflat_sac || 0);
             reduceHPIgnoringShield(player, sac);
-            ['player1', 'player2', 'player4'].forEach(p => adjustHP(p, healAmount));
+            ['player1', 'player2', 'player4'].forEach(p => adjustHP(p, healAmount)); // Fixed - includes all players
             console.log(`${player} used ${skill.name}: Sacrificed ${sac} HP and healed all allies for ${healAmount}.`);
         } else {
-            // single-target heal uses target selector if available
-            const targetSelect = document.getElementById(`target-${player}`);
-            const tgt = targetSelect ? targetSelect.value : player;
-            adjustHP(tgt, healAmount);
-            console.log(`${player} used ${skill.name}: Healed ${tgt} for ${healAmount}.`);
+            // Single-target heal - USE THE DETERMINED TARGET, not a new dropdown read
+            adjustHP(target, healAmount); // ✅ Use the target determined at the beginning
+            console.log(`${player} used ${skill.name}: Healed ${target} for ${healAmount}.`);
         }
 
         startCooldown(player, skillKey, skill.cooldown ?? 2);
@@ -1028,18 +1632,16 @@ function attackEnemy(player, skillIndex) {
         return;
     }
 
+    // Blessing buff
     if (skill && skill.blessing) {
-        // Determine target ally (fallback: self)
-        const targetSelect = document.getElementById(`target-${player}`);
-        const tgt = targetSelect ? targetSelect.value : player;
-        window.blessingBuff[tgt] = skill.duration; // e.g. 2 turns
-        console.log(`${player} used Blessing on ${tgt}: +20% pre-mitigation damage for ${skill.duration} turns.`);
+        window.blessingBuff[target] = skill.duration || 2; // ✅ Use the determined target
+        console.log(`${player} used Blessing on ${target}: +20% pre-mitigation damage for ${skill.duration || 2} turns.`);
         startCooldown(player, skillKey, skill.cooldown ?? 3);
         updateAllSkillCooldownDescriptions();
         return;
     }
 
-    // handle player2 support skills (Fortify / Guardian's Oath)
+    // Player2 support skills (Fortify/Guardian's Oath)
     if (player === 'player2' && skill) {
         if (typeof skill.maxHp_perc === 'number') {
             const maxHp = playersStats.player2.maxHp || playersStats.player2.hp || 1;
@@ -1051,15 +1653,18 @@ function attackEnemy(player, skillIndex) {
             updateAllSkillCooldownDescriptions();
             return;
         }
+        
         if (typeof skill.currHP_sac === 'number' && typeof skill.currHP_shield === 'number') {
             const sacAmount = Math.round((playersStats.player2.hp || 0) * skill.currHP_sac);
-            const shieldValuePerAlly = Math.round((playersStats.player2.hp || 0) * (skill.currHP_shield || 1));
+            const shieldValuePerAlly = Math.round((playersStats.player2.hp || 0) * skill.currHP_shield);
             if (sacAmount <= 0) {
                 console.log('Not enough HP to sacrifice for Guardian\'s Oath.');
                 return;
             }
             reduceHPIgnoringShield('player2', sacAmount);
+            // Use ally target for Guardian's Oath if it should be single-target, or keep as AoE
             ['player1', 'player3', 'player4'].forEach(p => {
+                if (isDead(p)) return;
                 addShield(p, shieldValuePerAlly, 2, { unstackable: true });
             });
             console.log(`player2 used ${skill.name}: Sacrificed ${sacAmount} HP and granted ${shieldValuePerAlly} shield to all allies.`);
@@ -1069,50 +1674,135 @@ function attackEnemy(player, skillIndex) {
         }
     }
 
+    // Damage calculation
     let damage = 0;
     if (skill.damagePercent) {
-        // Use the new damage formula
         damage = calculateDamage(player, target, skill.damagePercent, skill.flatdamage, skill.magPercentDamage || 0, skill.defIgnore || 0);
     } else if (skill.damage) {
-        // For fixed damage skills, use the old system
         damage = skill.damage;
     }
 
-    // Check for boss invulnerability
-    if (window.bossInvulnerable?.turnsLeft > 0) {
+    // Check invulnerability
+    if ((target === 'boss' || target === 'boss2') && window.bossInvulnerable?.turnsLeft > 0) {
         console.log(`Attack negated: Boss invulnerable (${window.bossInvulnerable.turnsLeft} turns left).`);
         damage = 0;
     }
 
+    // Apply damage
     if (damage > 0) {
-        playersStats[target].hp = Math.max(0, playersStats[target].hp - damage);
-        updateHPAndShieldUI(target);
-        const label = document.getElementById('stats-hp-boss');
-        if (label) label.innerText = playersStats[target].hp;
+        const originalBossHP = playersStats.boss.hp || 0;
 
-        console.log(`${player} used ${skill.name} on ${target}: ${skill.description} (Dealt ${damage})`);
-        startCooldown(player, skillKey, skill.cooldown ?? 2);
-        updateAllSkillCooldownDescriptions();
+        // AoE skills hit multiple targets
+        if (skill.name && (skill.name.includes('Volley') || skill.name.includes('Explosive'))) {
+            // Hit main boss
+            playersStats.boss.hp = Math.max(0, playersStats.boss.hp - damage);
+            updateHPAndShieldUI('boss');
+            console.log(`${player} used ${skill.name} on Bakunawa: (Dealt ${damage})`);
+            
+            // Hit second boss if active
+            if (window.bakunawaPhase2Active && playersStats.boss2.hp > 0) {
+                const damage2 = calculateDamage(player, 'boss2', skill.damagePercent, skill.flatdamage, skill.magPercentDamage || 0, skill.defIgnore || 0);
+                playersStats.boss2.hp = Math.max(0, playersStats.boss2.hp - damage2);
+                updateHPAndShieldUI('boss2');
+                console.log(`${player} used ${skill.name} on Minokawa: (Dealt ${damage2})`);
+            }
+            
+            // Check phase transition
+            const newBossHP = playersStats.boss.hp || 0;
+            const maxHP = playersStats.boss.maxHp || 1;
+            if (originalBossHP > maxHP * 0.5 && newBossHP <= maxHP * 0.5 && newBossHP > 0) {
+                checkBakunawaPhase();
+            }
+        } else {
+            // Single target attack
+            playersStats[target].hp = Math.max(0, playersStats[target].hp - damage);
+            updateHPAndShieldUI(target);
+            console.log(`${player} used ${skill.name} on ${target}: (Dealt ${damage})`);
+            
+            // Check phase transition for boss
+            if (target === 'boss') {
+                const newBossHP = playersStats[target].hp || 0;
+                const maxHP = playersStats[target].maxHp || 1;
+                if (originalBossHP > maxHP * 0.5 && newBossHP <= maxHP * 0.5 && newBossHP > 0) {
+                    checkBakunawaPhase();
+                }
+            }
+        }
     }
+    
+    // Update UI labels
+    const label = document.getElementById('stats-hp-boss');
+    if (label) label.innerText = playersStats.boss.hp;
+    const label2 = document.getElementById('stats-hp-boss2');
+    if (label2) label2.innerText = playersStats.boss2.hp;
+    
+    if (!window.dungeonBuff3Active) {
+        startCooldown(player, skillKey, skill.cooldown ?? 2);
+    } else {
+        console.log(`${player} used ${skill.name}: No cooldown applied (Dungeon Buff 3 active).`);
+    }
+    updateAllSkillCooldownDescriptions();
 }
 
 
 // Heals the entity selected in the healer's target dropdown
 function healSelectedTarget(healer, healAmount) {
+    if (isDead(healer)) {
+        console.log(`${healer} cannot heal: entity is dead.`);
+        return;
+    }
+
     const skillKey = `heal-${healAmount}`;
+    // Check cooldown (dungeon buff 3 bypasses this via isOnCooldown)
     if (isOnCooldown(healer, skillKey)) {
         console.log(`${healer} heal is on cooldown (${cooldowns[healer][skillKey]} rounds left).`);
         return;
     }
+    
     const targetSelect = document.getElementById(`target-${healer}`);
     const target = targetSelect ? targetSelect.value : healer;
     if (!playersStats[target]) return;
 
-    // keep backward-compatible numeric healAmount path
     adjustHP(target, Math.abs(healAmount));
     console.log(`${healer} healed ${target} for ${Math.abs(healAmount)} HP`);
-    startCooldown(healer, skillKey, getHealCooldownDuration(healer, healAmount));
+    
+    // Only start cooldown if dungeon buff 3 is not active
+    if (!window.dungeonBuff3Active) {
+        startCooldown(healer, skillKey, getHealCooldownDuration(healer, healAmount));
+    }
     updateAllSkillCooldownDescriptions();
 }
 
+//OPTIONAL
+function resurrect(entity, hpPercent = 0.5) {
+    if (isDead(entity)) {
+        window.deadEntities.delete(entity);
+        const maxHp = playersStats[entity].maxHp || 100;
+        const newHp = Math.round(maxHp * hpPercent);
+        playersStats[entity].hp = newHp;
+        
+        console.log(`${entity} has been resurrected with ${newHp} HP!`);
+        
+        // Restore visual indicators
+        const hpBar = document.getElementById(`hp-${entity}`);
+        if (hpBar) hpBar.style.backgroundColor = ''; // Remove gray
+        
+        updateHPAndShieldUI(entity);
+    }
+}
 
+function checkGameState() {
+    const playersAlive = ['player1', 'player2', 'player3', 'player4'].some(p => !isDead(p));
+    const bossesAlive = !isDead('boss') || (window.bakunawaPhase2Active && !isDead('boss2'));
+    
+    if (!playersAlive) {
+        console.log('GAME OVER: All players defeated!');
+        // Add game over logic here
+        return 'defeat';
+    } else if (!bossesAlive) {
+        console.log('VICTORY: All bosses defeated!');
+        // Add victory logic here
+        return 'victory';
+    }
+    return 'ongoing';
+}
