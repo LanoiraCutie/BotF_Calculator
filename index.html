@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Players with HP Bars and Skills</title>
+    <title>BotF Calculator</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -13,6 +13,7 @@
     <div class="players-container">
         <h2 style="margin: 0;">Round: <span id="round-counter">1</span></h2>
         <button onclick="endRound()">End Round</button>
+        <button onclick="resetAllBuffsDebuffsAndCooldowns()">Reset All</button>
         <span>Cooldowns reduce by 1 each round.</span>
         <div style="margin-bottom:10px;">
             <div class="buff-controls">
@@ -23,19 +24,19 @@
                 <br>
                 <label>
                     <input type="checkbox" id="dungeon-buff1-checkbox"
-                        onchange="window.dungeonBuff1Active=this.checked;">
+                        onchange="window.dungeonBuff1Active=this.checked; updateAllStatusEffectsUI();">
                     Dagat ng Kabisayaan (+15% DMG to all)
                 </label>
                 <br>
                 <label>
                     <input type="checkbox" id="dungeon-buff2-checkbox"
-                        onchange="window.dungeonBuff2Active=this.checked;">
+                        onchange="window.dungeonBuff2Active=this.checked; updateAllStatusEffectsUI();">
                     Daragang Magayon (+25% DEF to all players)
                 </label>
                 <br>
                 <label>
                     <input type="checkbox" id="dungeon-buff3-checkbox"
-                        onchange="window.dungeonBuff3Active=this.checked;">
+                        onchange="window.dungeonBuff3Active=this.checked; updateAllStatusEffectsUI();">
                     Bundok Pulag (No Cooldown for all skills)
                 </label>
             </div>
@@ -55,12 +56,6 @@
                 <select id="enemy-target-player1">
                     <option value="boss">Boss</option>
                 </select>
-                <!-- Mandirigma doesn't need ally targeting since no support skills -->
-                <label style="margin-left:8px;">
-                    <input type="checkbox" id="mandirigma-rage-checkbox"
-                        onchange="window.mandirigmaRageActive=this.checked;window.mandirigmaRageDefIgnore=this.checked?0.2:0;">
-                    Mandirigma Rage (Berserk) (+50% DMG, ignore 20% DEF)
-                </label>
             </div>
             <div class="hp-bar">
                 <div class="hp-fill" id="hp-player1" style="width: 100%;"></div>
@@ -70,6 +65,7 @@
                 <div class="stat">ATK: <span id="stats-atk-player1">20</span></div>
                 <div class="stat">DEF: <span id="stats-def-player1">10</span></div>
             </div>
+            <div class="status-effects" id="status-effects-player1"></div>
             <div class="skills">
                 <div class="skill">
                     <button onclick="attackEnemy('player1', 0)">Skill 1</button>
@@ -81,6 +77,14 @@
                 </div>
                 <div class="skill">
                     <button onclick="attackEnemy('player1', 2)">Skill 3</button>
+                    <div class="skill-description">All-in Attack: Deals 834% ATK to the boss. (CD: 2)</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player1', 3)">Skill 4</button>
+                    <div class="skill-description">All-in Attack: Deals 834% ATK to the boss. (CD: 2)</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player1', 4)">Skill 3</button>
                     <div class="skill-description">All-in Attack: Deals 834% ATK to the boss. (CD: 2)</div>
                 </div>
             </div>
@@ -107,11 +111,6 @@
                     <option value="player3">Babaylan</option>
                     <option value="player4">Mangangayaw</option>
                 </select>
-                <label style="margin-left:16px;">
-                    <input type="checkbox" id="bagani-laststand-checkbox"
-                        onchange="window.baganiLastStandActive=this.checked;">
-                    Bagani Last Stand (+50% DEF)
-                </label>
             </div>
             <div class="hp-bar">
                 <div class="hp-fill" id="hp-player2" style="width: 100%;"></div>
@@ -121,6 +120,7 @@
                 <div class="stat">ATK: <span id="stats-atk-player2">25</span></div>
                 <div class="stat">DEF: <span id="stats-def-player2">15</span></div>
             </div>
+            <div class="status-effects" id="status-effects-player2"></div>
             <div class="skills">
                 <div class="skill">
                     <button onclick="attackEnemy('player2', 0)">Skill 1</button>
@@ -132,6 +132,10 @@
                 </div>
                 <div class="skill">
                     <button onclick="attackEnemy('player2', 2)">Skill 3</button>
+                    <div class="skill-description">Counterattack: Deals damage to the boss. (CD: 2)</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player2', 3)">Skill 4</button>
                     <div class="skill-description">Counterattack: Deals damage to the boss. (CD: 2)</div>
                 </div>
             </div>
@@ -167,6 +171,7 @@
                 <div class="stat">MAG: <span id="stats-atk-player3">30</span></div>
                 <div class="stat">DEF: <span id="stats-def-player3">20</span></div>
             </div>
+            <div class="status-effects" id="status-effects-player3"></div>
             <div class="skills">
                 <div class="skill">
                     <button onclick="attackEnemy('player3', 0)">Skill 1</button>
@@ -182,6 +187,10 @@
                 </div>
                 <div class="skill">
                     <button onclick="attackEnemy('player3', 3)">Skill 4</button>
+                    <div class="skill-description">Resurrection Blast: Deals damage to the boss. (CD: 2)</div>
+                </div>
+                <div class="skill">
+                    <button onclick="attackEnemy('player3', 4)">Skill 4</button>
                     <div class="skill-description">Resurrection Blast: Deals damage to the boss. (CD: 2)</div>
                 </div>
             </div>
@@ -210,6 +219,7 @@
                 <div class="stat">ATK: <span id="stats-atk-player4">35</span></div>
                 <div class="stat">DEF: <span id="stats-def-player4">25</span></div>
             </div>
+            <div class="status-effects" id="status-effects-player4"></div>
             <div class="skills">
                 <div class="skill">
                     <button onclick="attackEnemy('player4', 0)">Skill 1</button>
@@ -349,6 +359,7 @@
             updatePlayerSkillButtons();
             updateBossUI();
             updatePlayerTargetDropdowns();
+            updateAllStatusEffectsUI();
             if (typeof updateAllSkillCooldownDescriptions === 'function') {
                 updateAllSkillCooldownDescriptions();
             }

@@ -11,6 +11,38 @@ body {
     box-sizing: border-box;
 }
 
+.status-effects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+    min-height: 20px;
+}
+
+.status-effect {
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    color: black;
+    white-space: nowrap;
+}
+
+.status-effect.buff {
+    background-color: #90EE90; /* light green */
+    border: 1px solid #228B22; /* green border */
+}
+
+.status-effect.debuff {
+    background-color: #FFB6C1; /* light red */
+    border: 1px solid #DC143C; /* red border */
+}
+
+.status-effect.turns {
+    font-size: 10px;
+    opacity: 0.8;
+}
+
 .players-container {
     width: 70%;
     height: 100%;
