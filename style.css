@@ -89,7 +89,7 @@ body {
 }
 
 .players-container {
-    min-width: 75%;
+    min-width: 80%;
     width: auto;
     height: 100%;
     padding: 20px;
@@ -218,8 +218,28 @@ body {
     color: #bebdbd;
 }
 
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: auto; /* pushes logo to bottom */
+    padding: 20px 0;
+}
+
+.game-logo {
+    max-width: 90%;
+    height: auto;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.game-logo:hover {
+    opacity: 1;
+}
+
+/* Make boss container use flexbox to push logo to bottom */
 .boss-container {
-    width: 25%;
+    width: 20%;
     height: 100%;
     border: 2px solid #ff0000;
     background-color: rgba(255, 230, 230, 0.2);
@@ -227,6 +247,13 @@ body {
     box-sizing: border-box;
     border-radius: 5px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Add this to ensure proper spacing */
+.boss-container > * {
+    flex-shrink: 0; /* Prevent all direct children from shrinking */
 }
 
 .boss-container h2 {
@@ -240,4 +267,17 @@ body {
     display: flex;
     margin: 1rem 0;
     gap: 10px;
+}
+
+#damage-log {
+    margin-top: 16px;
+    flex: 1; /* Take remaining space */
+    flex-shrink: 1; /* Allow shrinking if needed */
+    overflow-y: auto;
+    background: #222;
+    color: #fff;
+    font-size: 14px;
+    border-radius: 6px;
+    padding: 8px;
+    min-height: 80px; /* Minimum height */
 }

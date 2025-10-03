@@ -9,8 +9,8 @@
 </head>
 
 <body>
-
     <div class="players-container">
+        <h1 align="center">Balangay of the Forgotten (BotF) Calculator</h1>
         <h2 style="margin: 0;">Round: <span id="round-counter">1</span></h2>
         <button onclick="endRound()">End Round</button>
         <button onclick="resetAllBuffsDebuffsAndCooldowns()">Reset All</button>
@@ -56,6 +56,11 @@
                 <select id="enemy-target-player1">
                     <option value="boss">Boss</option>
                 </select>
+                <br>
+                <label>
+                    <input type="checkbox" id="bonecracked-checkbox">
+                    Inflict Bone Cracked (-10% DEF for 1 turn)
+                </label>
             </div>
             <div class="hp-bar">
                 <div class="hp-fill" id="hp-player1" style="width: 100%;"></div>
@@ -299,21 +304,13 @@
         <div id="damage-log"
             style="margin-top:16px; min-height:80px; max-height:180px; overflow-y:auto; background:#222; color:#fff; font-size:14px; border-radius:6px; padding:8px;">
         </div>
+        <div class="logo-container">
+            <img src="asset/Balangay of the Forgotten.png" alt="Balangay of the Forgotten" class="game-logo">
+        </div>
     </div>
 
     <script src="script.js"></script>
     <script>
-        function increaseBossDEF() {
-            var input = document.getElementById('boss-def-increase');
-            if (!input) return;
-            var amount = Math.max(0, parseInt(input.value || '0', 10));
-            var boss = window.playersStats ? window.playersStats['boss'] : null;
-            if (!boss) return;
-            boss.def = boss.def + amount;
-            var defEl = document.getElementById('stats-def-boss');
-            if (defEl) defEl.innerText = boss.def;
-            input.value = '0';
-        }
         function updateBossSkillButtons() {
             // Get selected preset
             var bossSelect = document.getElementById('preset-entity');
@@ -375,105 +372,34 @@
                     updatePlayerSkillButtons();
                 });
             }
-        });
 
-        // Mandirigma Rage (Berserk) effect
-        window.mandirigmaRageActive = false;
-        window.mandirigmaRageDefIgnore = 0;
+            const dungeonBuff3Checkbox = document.getElementById('dungeon-buff3-checkbox');
+            if (dungeonBuff3Checkbox) {
+                dungeonBuff3Checkbox.addEventListener('change', function () {
+                    window.dungeonBuff3Active = this.checked;
 
-        function applyMandirigmaRage() {
-            window.mandirigmaRageActive = true;
-            window.mandirigmaRageDefIgnore = 0.2; // 20% DEF ignore
-            alert("Mandirigma Rage activated! +50% DMG, ignore 20% enemy DEF.");
-        }
+                    if (this.checked) {
+                        // Immediately clear all player cooldowns
+                        ['player1', 'player2', 'player3', 'player4'].forEach(player => {
+                            if (cooldowns[player]) {
+                                Object.keys(cooldowns[player]).forEach(skillKey => {
+                                    cooldowns[player][skillKey] = 0;
+                                });
+                            }
+                        });
 
-        function removeMandirigmaRage() {
-            window.mandirigmaRageActive = false;
-            window.mandirigmaRageDefIgnore = 0;
-            alert("Mandirigma Rage buff removed.");
-        }
-
-        // Patch attackEnemy to apply rage effect
-        const originalAttackEnemy = window.attackEnemy;
-        window.attackEnemy = function (player, skillIndex) {
-            if (player === 'player1' && window.mandirigmaRageActive) {
-                // Temporarily patch calculateDamage for Mandirigma Rage
-                const originalCalculateDamage = window.calculateDamage;
-                window.calculateDamage = function (attacker, target, damagePercent, flatdamage = 0, magPercentDamage = 0, defIgnore = 0) {
-                    const attackerStats = window.playersStats[attacker];
-                    const targetStats = window.playersStats[target];
-                    let atkDamage = 0;
-                    let magDamage = 0;
-                    let def = (targetStats.def || 0) * (1 - defIgnore);
-                    def = def * (1 - window.mandirigmaRageDefIgnore); // ignore 20% DEF
-                    // +50% DMG
-                    if (attacker === 'boss') {
-                        atkDamage = ((flatdamage || 0) + (attackerStats.atk || 0) * (damagePercent || 0)) / (1 + def * 0.01);
-                        magDamage = ((flatdamage || 0) + (attackerStats.mag || 0) * (magPercentDamage || 0)) / (1 + def * 0.01);
-                        return Math.max(1, Math.round((atkDamage + magDamage) * 1.5));
+                        console.log('Bundok Pulag activated: All cooldowns cleared immediately!');
+                        logDamage('Bundok Pulag: All skill cooldowns reset to 0!');
+                        updateAllSkillCooldownDescriptions();
                     } else {
-                        const attackerATK = attackerStats.mag || attackerStats.atk;
-                        atkDamage = ((flatdamage || 0) + attackerATK * damagePercent) / (1 + def * 0.01);
-                        return Math.max(1, Math.round(atkDamage * 1.5));
+                        console.log('Bundok Pulag deactivated: Normal cooldown rules apply.');
+                        logDamage('Bundok Pulag deactivated: Cooldowns will apply normally.');
                     }
-                };
-                originalAttackEnemy(player, skillIndex);
-                window.calculateDamage = originalCalculateDamage;
-            } else {
-                originalAttackEnemy(player, skillIndex);
-            }
-        };
-
-        function appendDamageLog(msg) {
-            const logDiv = document.getElementById('damage-log');
-            if (logDiv) {
-                const time = new Date().toLocaleTimeString();
-                logDiv.innerHTML += `<div>[${time}] ${msg}</div>`;
-                logDiv.scrollTop = logDiv.scrollHeight;
-            }
-        }
-
-        // Patch attackEnemy and entityAttack to log damage
-        window.attackEnemy = function (player, skillIndex) {
-            // ...existing code...
-            const target = 'boss';
-            const skill = playerSkills[player][skillIndex];
-            let damage = 0;
-            if (skill.damagePercent) {
-                damage = calculateDamage(player, target, skill.damagePercent, skill.flatdamage, skill.magPercentDamage || 0, skill.defIgnore || 0);
-            } else if (skill.damage) {
-                damage = skill.damage;
-            }
-            if (damage > 0) {
-                appendDamageLog(`${player} used ${skill.name} on Boss: ${damage} damage${window.critActive ? " (CRIT!)" : ""}`);
-            }
-            originalAttackEnemy(player, skillIndex);
-        };
-
-        const originalEntityAttack = window.entityAttack;
-        window.entityAttack = function (skillIndex) {
-            // ...existing code...
-            const bossSelect = document.getElementById('preset-entity');
-            const selectedPreset = bossSelect ? bossSelect.value : 'Bathala';
-            const skills = bossSkills[selectedPreset];
-            if (!skills || !skills[skillIndex]) return;
-            const skill = skills[skillIndex];
-            const target = document.getElementById('entity-target').value;
-
-            // If skill is for all players, apply to all
-            if (skill.description.includes('all players')) {
-                ['player1', 'player2', 'player3', 'player4'].forEach(p => {
-                    const damage = calculateDamage('boss', p, skill.damagePercent || 0, skill.magPercentDamage || 0);
-                    appendDamageLog(`Boss (${selectedPreset}) used ${skill.name} on ${p}: ${damage} damage${window.critActive ? " (CRIT!)" : ""}`);
                 });
-            } else if (!(selectedPreset === 'Mayari' && skill.healPercent)) {
-                const damage = calculateDamage('boss', target, skill.damagePercent || 0, skill.magPercentDamage || 0);
-                appendDamageLog(`Boss (${selectedPreset}) used ${skill.name} on ${target}: ${damage} damage${window.critActive ? " (CRIT!)" : ""}`);
+            } else {
+                console.error('Bundok Pulag checkbox not found!');
             }
-            originalEntityAttack(skillIndex);
-        };
-
-        // ...existing code...
+        });
     </script>
 </body>
 

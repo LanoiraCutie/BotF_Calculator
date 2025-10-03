@@ -44,7 +44,7 @@ const presets = {
 const playerSkills = {
     player1: [
         { name: "Attack", flatdamage: 50, damagePercent: 1.5, cooldown: 1, description: "Deals fair damage." },
-        { name: "Heavy Attack", damagePercent: 3.34, cooldown: 2, description: "Deals heavy damage." },
+        { name: "Heavy Attack", damagePercent: 3.34, cooldown: 2, bonecracked_if_active: true, duration: 1, reduce_enemyDEF: 0.1, description: "Deals heavy damage." },
         { name: "All-in Attack", damagePercent: 8.34, cooldown: 3, description: "Deals massive damage." },
         { name: "Rest", remove_debuff: true, cooldown: 3, description: "Removes negative status effects for self." },
         { name: "Berserk", HP_requirement_from_maxHP_below: 0.51, mandirigma_rage: true, dmgMultiplier_increase: 0.5, defIgnore: 0.2, duration: 3, cooldown: 4, description: "Increases damage for 2 turns." }
@@ -150,6 +150,7 @@ window.dungeonBuff3Active = false; // No cooldown for all skills
 window.currentBossName = null; // Track current boss for change detection
 window.deadBosses = new Set(); // Track which bosses have been permanently defeated
 window.deadPlayers = new Set(); // Track which players have been permanently defeated
+window.bonecrackedDebuffs = {}; // bonecrackedDebuffs[targetId] = { turnsLeft, defReduce }
 
 function resetAllBuffsDebuffsAndCooldowns() {
     console.log('Resetting all buffs, debuffs, and cooldowns due to boss change...');
@@ -182,6 +183,7 @@ function resetAllBuffsDebuffsAndCooldowns() {
     window.devouredDebuffs = {};
     window.eyeDragonDebuffs = {};
     window.moonfallDebuffs = {};
+    window.bonecrackedDebuffs = {};
 
     // Clear all shields
     ['player1', 'player2', 'player3', 'player4', 'boss', 'boss2'].forEach(entity => {
@@ -347,6 +349,15 @@ function updateStatusEffectsUI(entity) {
     }
 
     // Check debuffs (red)
+    if (window.bonecrackedDebuffs && window.bonecrackedDebuffs[entity]) {
+        effects.push({
+            name: 'Bone Cracked',
+            type: 'debuff',
+            turns: window.bonecrackedDebuffs[entity].turnsLeft,
+            description: 'def-10%'
+        });
+    }
+
     if (window.bindDebuffs && window.bindDebuffs[entity]) {
         effects.push({
             name: 'Bind',
@@ -442,11 +453,22 @@ function updateAllStatusEffectsUI() {
 }
 
 function cleanseBossDebuffs() {
+    if (window.bonecrackedDebuffs && window.bonecrackedDebuffs['boss']) {
+        delete window.bonecrackedDebuffs['boss'];
+        logDamage(`Removed Bone Cracked debuff from boss.`);
+    }
     // Remove any DEF-reducing or negative flags applied to boss
     if (window.moonfallDebuffs && window.moonfallDebuffs['boss']) {
         delete window.moonfallDebuffs['boss'];
+        logDamage(`Removed Moonfall debuff from boss.`);
     }
-    // Placeholder: clear other future boss debuffs here
+    ['player1', 'player2', 'player3', 'player4'].forEach(player => {
+        if (window.bonecrackedDebuffs && window.bonecrackedDebuffs[player]) {
+            delete window.bonecrackedDebuffs[player];
+            logDamage(`Removed Bone Cracked debuff from ${player}.`);
+        }
+    });
+    // Add any other boss debuffs here as needed
     console.log("Boss debuffs cleansed.");
 }
 
@@ -477,7 +499,7 @@ function checkBakunawaPhase() {
         playersStats.boss.hp = Math.min(bakunawaMaxHp, playersStats.boss.hp + healAmount);
         playersStats.boss2.hp = Math.min(bakunawaMaxHp, playersStats.boss2.hp + healAmount);
 
-        console.log(`Phase 2: Minokawa spawned with ${minokawaHp} HP! Both bosses healed for ${healAmount}.`);
+        logDamage(`Phase 2: Minokawa spawned with ${minokawaHp} HP! Both bosses healed for ${healAmount}.`);
 
         // Update UI and targeting
         updateBossUI();
@@ -557,6 +579,9 @@ function updateBossUI() {
             </div>
             
             <div id="damage-log"></div>
+            <div class="logo-container">
+                <img src="asset/Balangay of the Forgotten.png" alt="Balangay of the Forgotten" class="game-logo">
+            </div>
         `;
 
         // Add Bakunawa skills
@@ -624,6 +649,9 @@ function updateBossUI() {
             </div>
             
             <div id="damage-log"></div>
+            <div class="logo-container">
+                <img src="asset/Balangay of the Forgotten.png" alt="Balangay of the Forgotten" class="game-logo">
+            </div>
         `;
 
         // Add single boss skills
@@ -683,7 +711,7 @@ function minokawaAttack(skillIndex) {
                 defReduce: skill.reduce_enemyDEF || 0.1
             };
 
-            console.log(`Minokawa used ${skill.name} on ${p}: Dealt ${dmg} damage and applied Eye of the Dragon (-${(window.eyeDragonDebuffs[p].defReduce * 100)}% DEF) for ${window.eyeDragonDebuffs[p].turnsLeft} turns.`);
+            logDamage(`Minokawa used ${skill.name} on ${p}: Dealt ${dmg} damage and applied Eye of the Dragon (-${(window.eyeDragonDebuffs[p].defReduce * 100)}% DEF) for ${window.eyeDragonDebuffs[p].turnsLeft} turns.`);
         });
         updateAllStatusEffectsUI();
         return;
@@ -703,7 +731,7 @@ function minokawaAttack(skillIndex) {
         );
 
         adjustHP(target, -dmg);
-        console.log(`Minokawa used ${skill.name} on ${target}: Dealt ${dmg} damage.`);
+        logDamage(`Minokawa used ${skill.name} on ${target}: Dealt ${dmg} damage.`);
 
         // Check if target was defeated (HP reduced to 0)
         const newHP = playersStats[target].hp || 0;
@@ -711,7 +739,7 @@ function minokawaAttack(skillIndex) {
             const minokawaMaxHp = playersStats.boss2.maxHp || 1;
             const healAmount = Math.round(minokawaMaxHp * (skill.maxHp_heal_if_defeatedhero || 0));
             adjustHP('boss2', healAmount);
-            console.log(`${target} was defeated! Minokawa healed for ${healAmount} HP (${(skill.maxHp_heal_if_defeatedhero * 100)}% max HP).`);
+            logDamage(`${target} was defeated! Minokawa healed for ${healAmount} HP (${(skill.maxHp_heal_if_defeatedhero * 100)}% max HP).`);
         }
         return;
     }
@@ -727,7 +755,7 @@ function minokawaAttack(skillIndex) {
             skill.defIgnore || 0  // Solar Devour has defIgnore: 0.1
         );
         adjustHP(victim, -dmg);
-        console.log(`Minokawa used ${skill.name} on ${victim}: ${skill.description} (Dealt ${dmg})`);
+        logDamage(`Minokawa used ${skill.name} on ${victim}: ${skill.description} (Dealt ${dmg})`);
     };
 
     if (skill.hitsAll) {
@@ -738,6 +766,17 @@ function minokawaAttack(skillIndex) {
 }
 
 // Functions to handle buff/debuff durations
+function tickBonecrackedDebuffs() {
+    if (!window.bonecrackedDebuffs) return;
+    Object.keys(window.bonecrackedDebuffs).forEach(entity => {
+        window.bonecrackedDebuffs[entity].turnsLeft = Math.max(0, (window.bonecrackedDebuffs[entity].turnsLeft || 0) - 1);
+        if (window.bonecrackedDebuffs[entity].turnsLeft <= 0) {
+            delete window.bonecrackedDebuffs[entity];
+            console.log(`Bone Cracked debuff expired on ${entity}.`);
+        }
+    });
+}
+
 function tickMandirigmaRageBuff() {
     if (!window.mandirigmaRageBuff) return;
     if (window.mandirigmaRageBuff.turnsLeft > 0) {
@@ -745,7 +784,7 @@ function tickMandirigmaRageBuff() {
         if (window.mandirigmaRageBuff.turnsLeft <= 0) {
             window.mandirigmaRageBuff.dmgIncrease = 0;
             window.mandirigmaRageBuff.defIgnore = 0;
-            console.log('Mandirigma Rage expired.');
+            logDamage('Mandirigma Rage expired.');
         }
     }
 }
@@ -756,7 +795,7 @@ function tickBaganiLastStandBuff() {
         window.baganiLastStandBuff.turnsLeft -= 1;
         if (window.baganiLastStandBuff.turnsLeft <= 0) {
             window.baganiLastStandBuff.defIncrease = 0;
-            console.log('Bagani Last Stand expired.');
+            logDamage('Bagani Last Stand expired.');
         }
     }
 }
@@ -764,22 +803,26 @@ function tickBaganiLastStandBuff() {
 // Add debuff cleanse function
 function cleansePlayerDebuffs(player) {
     // Remove DEF-reducing debuffs
+    if (window.bonecrackedDebuffs && window.bonecrackedDebuffs[player]) {
+        delete window.bonecrackedDebuffs[player];
+        logDamage(`Removed Bone Cracked debuff from ${player}.`);
+    }
     if (window.bindDebuffs && window.bindDebuffs[player]) {
         delete window.bindDebuffs[player];
-        console.log(`Removed Bind debuff from ${player}.`);
+        logDamage(`Removed Bind debuff from ${player}.`);
     }
     if (window.moonfallDebuffs && window.moonfallDebuffs[player]) {
         delete window.moonfallDebuffs[player];
-        console.log(`Removed Moonfall debuff from ${player}.`);
+        logDamage(`Removed Moonfall debuff from ${player}.`);
     }
     if (window.eyeDragonDebuffs && window.eyeDragonDebuffs[player]) {
         delete window.eyeDragonDebuffs[player];
-        console.log(`Removed Eye of the Dragon debuff from ${player}.`);
+        logDamage(`Removed Eye of the Dragon debuff from ${player}.`);
     }
     // Remove DoT debuffs
     if (window.devouredDebuffs && window.devouredDebuffs[player]) {
         delete window.devouredDebuffs[player];
-        console.log(`Removed Devoured DoT from ${player}.`);
+        logDamage(`Removed Devoured DoT from ${player}.`);
     }
 }
 
@@ -906,7 +949,7 @@ window.calculateDamage = function (
 ) {
     // Check for boss invulnerability
     if (target === 'boss' && window.bossInvulnerable?.turnsLeft > 0 && attacker !== 'boss') {
-        console.log(`Damage prevented: boss invulnerable (${window.bossInvulnerable.turnsLeft} turns left).`);
+        logDamage(`Damage prevented: boss invulnerable (${window.bossInvulnerable.turnsLeft} turns left).`);
         return 0;
     }
 
@@ -944,6 +987,12 @@ window.calculateDamage = function (
 
 
     // DEF reductions
+    // Bone Cracked debuff (DEF reduction)
+    if (window.bonecrackedDebuffs && window.bonecrackedDebuffs[target]) {
+        const red = window.bonecrackedDebuffs[target].defReduce || 0;
+        def = def * (1 - red);
+    }
+
     // Eye of the Dragon debuff (DEF reduction)
     if (target !== 'boss' && target !== 'boss2' && window.eyeDragonDebuffs && window.eyeDragonDebuffs[target]) {
         const red = window.eyeDragonDebuffs[target].defReduce || 0;
@@ -1122,6 +1171,7 @@ function endRound() {
     tickEyeDragonDebuffs();
     tickMandirigmaRageBuff();
     tickBaganiLastStandBuff();
+    tickBonecrackedDebuffs();
 
     console.log(`Round ${currentRound} started. Cooldowns decremented.`);
     updateAllSkillCooldownDescriptions();
@@ -1190,21 +1240,21 @@ function updateAllSkillCooldownDescriptions() {
         const skillDivs = container.querySelectorAll('.skills .skill');
         const skills = playerSkills[playerId];
         if (!skills) return;
-        
+
         skills.forEach((skill, idx) => {
             const skillDiv = skillDivs[idx];
             if (!skillDiv) return;
-            
+
             const descEl = skillDiv.querySelector('.skill-description');
             const button = skillDiv.querySelector('button');
             if (!descEl || !button) return;
-            
+
             const remain = getRemainingCooldown(playerId, idx);
             const cdText = ` (CD: ${remain})`;
-            
+
             // Reset to base description then append CD
             descEl.innerText = `${skill.description}${cdText}`;
-            
+
             // Update button styling based on cooldown
             if (remain > 0) {
                 button.classList.add('on-cooldown');
@@ -1225,7 +1275,7 @@ function updateAllSkillCooldownDescriptions() {
                 if (descEl && button) {
                     const remain = cooldowns.player2?.['heal-30'] || 0;
                     descEl.innerText = `Heal: Restores 30 HP to the selected ally. (CD: ${remain})`;
-                    
+
                     if (remain > 0) {
                         button.classList.add('on-cooldown');
                     } else {
@@ -1633,7 +1683,7 @@ function entityAttack(skillIndex) {
         const maxHp = playersStats.boss.maxHp || playersStats.boss.hp;
         const healAmount = Math.round(maxHp * healPercent);
         adjustHP('boss', healAmount);
-        console.log(`Mayari used ${skill.name}: Healed self for ${healAmount} HP (${Math.round(healPercent * 100)}% max HP).`);
+        logDamage(`Mayari used ${skill.name}: Healed self for ${healAmount} HP (${Math.round(healPercent * 100)}% max HP).`);
         return;
     }
 
@@ -1644,11 +1694,10 @@ function entityAttack(skillIndex) {
             defIncrease: skill.def_increase || 0.3
         };
         if (skill.remove_debuff) {
-            // Example: remove Moonfall debuffs from boss or all? (currently only boss-aimed debuffs matter)
-            // If you track other debuffs on boss, clear them here.
-            console.log("Heaven's Mandate: Debuffs cleansed (placeholder).");
+            cleanseBossDebuffs();
+            logDamage("Heaven's Mandate: Debuffs cleansed.");
         }
-        console.log(`Bathala used ${skill.name}: +${(window.bathalaMandateBuff.defIncrease * 100)}% DEF for ${window.bathalaMandateBuff.turnsLeft} turns.`);
+        logDamage(`Bathala used ${skill.name}: +${(window.bathalaMandateBuff.defIncrease * 100)}% DEF for ${window.bathalaMandateBuff.turnsLeft} turns.`);
         updateAllStatusEffectsUI();
         return;
     }
@@ -1659,11 +1708,11 @@ function entityAttack(skillIndex) {
             const curr = playersStats[p].hp || 0;
             const dmg = Math.max(1, Math.round(curr * skill.enemyDamage_currHp));
             adjustHP(p, -dmg); // shield can absorb
-            console.log(`Mayari used ${skill.name} on ${p}: ${Math.round(skill.enemyDamage_currHp * 100)}% current HP (Dealt ${dmg})`);
+            logDamage(`Mayari used ${skill.name} on ${p}: ${Math.round(skill.enemyDamage_currHp * 100)}% current HP (Dealt ${dmg})`);
         });
         if (skill.invulnerable_turn) {
             window.bossInvulnerable.turnsLeft = skill.invulnerable_turn;
-            console.log(`Boss is now invulnerable for ${window.bossInvulnerable.turnsLeft} turn(s).`);
+            logDamage(`Boss is now invulnerable for ${window.bossInvulnerable.turnsLeft} turn(s).`);
         }
         if (skill.remove_debuff) cleanseBossDebuffs();
         setTimeout(() => updateAllStatusEffectsUI(), 50);
@@ -1684,7 +1733,7 @@ function entityAttack(skillIndex) {
             atkIncrease: skill.atk_increase || 0,
             defIgnore: skill.defIgnore_buff || 0
         };
-        console.log(`Apolaki used ${skill.name}: Sacrificed ${sacAmount} HP. Next turn gain +${(window.daybreakFuryBuff.atkIncrease * 100)}% ATK and ignore ${(window.daybreakFuryBuff.defIgnore * 100)}% DEF.`);
+        logDamage(`Apolaki used ${skill.name}: Sacrificed ${sacAmount} HP. Next turn gain +${(window.daybreakFuryBuff.atkIncrease * 100)}% ATK and ignore ${(window.daybreakFuryBuff.defIgnore * 100)}% DEF.`);
         updateAllStatusEffectsUI();
         return;
     }
@@ -1700,7 +1749,7 @@ function entityAttack(skillIndex) {
             const healAmount = (skill.healFrom_mag || 0) + Math.round(bossMag * (skill.healFrom_magPerc || 0));
             adjustHP('boss', healAmount);
 
-            console.log(`${selectedPreset} used ${skill.name} on ${target}: Dealt ${dmg} damage and healed self for ${healAmount}.`);
+            logDamage(`${selectedPreset} used ${skill.name} on ${target}: Dealt ${dmg} damage and healed self for ${healAmount}.`);
             return;
         }
 
@@ -1716,7 +1765,7 @@ function entityAttack(skillIndex) {
                 defReduce: skill.reduce_enemyDEF || 0.15
             };
 
-            console.log(`${selectedPreset} used ${skill.name} on ${target}: Dealt ${dmg} damage and applied Bind (-${(window.bindDebuffs[target].defReduce * 100)}% DEF) for ${window.bindDebuffs[target].turnsLeft} turns.`);
+            logDamage(`${selectedPreset} used ${skill.name} on ${target}: Dealt ${dmg} damage and applied Bind (-${(window.bindDebuffs[target].defReduce * 100)}% DEF) for ${window.bindDebuffs[target].turnsLeft} turns.`);
             updateAllStatusEffectsUI();
             return;
         }
@@ -1726,7 +1775,7 @@ function entityAttack(skillIndex) {
             ['player1', 'player2', 'player3', 'player4'].forEach(p => {
                 const dmg = calculateDamage('boss', p, skill.damagePercent || 0, skill.flatdamage || 0, skill.magPercentDamage || 0, skill.defIgnore || 0);
                 adjustHP(p, -dmg);
-                console.log(`${selectedPreset} used ${skill.name} on ${p}: Dealt ${dmg} damage.`);
+                logDamage(`${selectedPreset} used ${skill.name} on ${p}: Dealt ${dmg} damage.`);
             });
 
             // Apply devoured DoT to all players
@@ -1738,7 +1787,7 @@ function entityAttack(skillIndex) {
                 };
             });
 
-            console.log(`Applied Devoured to all players: ${(skill.devoured_dot_magperc * 100)}% MAG DoT for ${skill.duration || 2} turns.`);
+            logDamage(`Applied Devoured to all players: ${(skill.devoured_dot_magperc * 100)}% MAG DoT for ${skill.duration || 2} turns.`);
             updateAllStatusEffectsUI();
             return;
         }
@@ -1750,7 +1799,7 @@ function entityAttack(skillIndex) {
                 attacksLeft: skill.strengthened_attack_num || 1,
                 multiplier: skill.strengthened_attack_mult || 2
             };
-            console.log(`${selectedPreset} used ${skill.name}: Next ${window.strengthenedBuff.boss.attacksLeft} attack(s) deal ${window.strengthenedBuff.boss.multiplier}x damage.`);
+            logDamage(`${selectedPreset} used ${skill.name}: Next ${window.strengthenedBuff.boss.attacksLeft} attack(s) deal ${window.strengthenedBuff.boss.multiplier}x damage.`);
             updateAllStatusEffectsUI();
             return;
         }
@@ -1768,7 +1817,7 @@ function entityAttack(skillIndex) {
             { dmgMultiplier: skill.dmgMultiplier || 1 }
         );
         adjustHP(victim, -dmg);
-        console.log(`${selectedPreset} used ${skill.name} on ${victim}: ${skill.description} (Dealt ${dmg})`);
+        logDamage(`${selectedPreset} used ${skill.name} on ${victim}: ${skill.description} (Dealt ${dmg})`);
     };
 
     if (skill.hitsAll) {
@@ -1783,20 +1832,20 @@ function entityAttack(skillIndex) {
             turnsLeft: skill.duration || 2,
             defReduce: skill.reduce_enemyDEF || 0.2
         };
-        console.log(`Applied Moonfall to ${target}: -${(window.moonfallDebuffs[target].defReduce * 100)}% DEF for ${window.moonfallDebuffs[target].turnsLeft} turns.`);
+        logDamage(`Applied Moonfall to ${target}: -${(window.moonfallDebuffs[target].defReduce * 100)}% DEF for ${window.moonfallDebuffs[target].turnsLeft} turns.`);
         updateAllStatusEffectsUI();
     }
 }
 
 function attackEnemy(player, skillIndex) {
     if (isDead(player)) {
-        console.log(`${player} cannot act: entity is dead.`);
+        logDamage(`${player} cannot act: entity is dead.`);
         return;
     }
 
     const skillKey = getSkillKey(player, skillIndex);
     if (isOnCooldown(player, skillKey)) {
-        console.log(`${player} skill ${skillIndex + 1} is on cooldown (${cooldowns[player][skillKey]} rounds left).`);
+        logDamage(`${player} skill ${skillIndex + 1} is on cooldown (${cooldowns[player][skillKey]} rounds left).`);
         return;
     }
 
@@ -1820,17 +1869,31 @@ function attackEnemy(player, skillIndex) {
             turnsLeft: skill.duration || 2,
             defIgnore: skill.defIgnore_buff || 0.2
         };
-        console.log(`${player} used ${skill.name}: For ${window.focusAimBuff[player].turnsLeft} turns ignore ${(window.focusAimBuff[player].defIgnore * 100)}% DEF.`);
+        logDamage(`${player} used ${skill.name}: For ${window.focusAimBuff[player].turnsLeft} turns ignore ${(window.focusAimBuff[player].defIgnore * 100)}% DEF.`);
         startCooldown(player, skillKey, skill.cooldown ?? 4);
         updateAllSkillCooldownDescriptions();
         setTimeout(() => updateAllStatusEffectsUI(), 50);
         return;
     }
 
+    if (player === 'player1' && skillIndex === 1) { // Heavy Attack is index 1
+        const bonecrackedCheckbox = document.getElementById('bonecracked-checkbox');
+        if (bonecrackedCheckbox && bonecrackedCheckbox.checked) {
+            // Apply Bone Cracked debuff to the target
+            if (!window.bonecrackedDebuffs) window.bonecrackedDebuffs = {};
+            window.bonecrackedDebuffs[target] = {
+                turnsLeft: 1, // 1 turn duration
+                defReduce: 0.1 // 10% DEF reduction
+            };
+            logDamage(`Bone Cracked applied to ${target}: -10% DEF for 1 turn.`);
+            setTimeout(() => updateAllStatusEffectsUI(), 50);
+        }
+    }
+
     // NEW: Rest (Mandirigma) - remove debuffs from self
     if (player === 'player1' && skill && skill.remove_debuff && !skill.hitsAll) {
         cleansePlayerDebuffs(player);
-        console.log(`${player} used ${skill.name}: Self debuffs removed.`);
+        logDamage(`${player} used ${skill.name}: Self debuffs removed.`);
         startCooldown(player, skillKey, skill.cooldown ?? 3);
         updateAllSkillCooldownDescriptions();
         setTimeout(() => updateAllStatusEffectsUI(), 50);
@@ -1844,7 +1907,7 @@ function attackEnemy(player, skillIndex) {
         const hpPercentage = currentHp / maxHp;
 
         if (hpPercentage > (skill.HP_requirement_from_maxHP_below || 0.51)) {
-            console.log(`${player} cannot use ${skill.name}: HP must be ≤50% (currently ${Math.round(hpPercentage * 100)}%).`);
+            logDamage(`${player} cannot use ${skill.name}: HP must be ≤50% (currently ${Math.round(hpPercentage * 100)}%).`);
             return;
         }
 
@@ -1853,7 +1916,7 @@ function attackEnemy(player, skillIndex) {
             dmgIncrease: skill.dmgMultiplier_increase || 0.5,
             defIgnore: skill.defIgnore || 0.2
         };
-        console.log(`${player} used ${skill.name}: +${(window.mandirigmaRageBuff.dmgIncrease * 100)}% DMG and ignore ${(window.mandirigmaRageBuff.defIgnore * 100)}% DEF for ${window.mandirigmaRageBuff.turnsLeft} turns.`);
+        logDamage(`${player} used ${skill.name}: +${(window.mandirigmaRageBuff.dmgIncrease * 100)}% DMG and ignore ${(window.mandirigmaRageBuff.defIgnore * 100)}% DEF for ${window.mandirigmaRageBuff.turnsLeft} turns.`);
         startCooldown(player, skillKey, skill.cooldown ?? 4);
         updateAllSkillCooldownDescriptions();
         setTimeout(() => updateAllStatusEffectsUI(), 50);
@@ -1867,7 +1930,7 @@ function attackEnemy(player, skillIndex) {
         const hpPercentage = currentHp / maxHp;
 
         if (hpPercentage > (skill.HP_requirement_from_maxHP_below || 0.2)) {
-            console.log(`${player} cannot use ${skill.name}: HP must be ≤20% (currently ${Math.round(hpPercentage * 100)}%).`);
+            logDamage(`${player} cannot use ${skill.name}: HP must be ≤20% (currently ${Math.round(hpPercentage * 100)}%).`);
             return;
         }
 
@@ -1875,7 +1938,7 @@ function attackEnemy(player, skillIndex) {
             turnsLeft: skill.duration || 3,
             defIncrease: skill.defIncrease || 0.5
         };
-        console.log(`${player} used ${skill.name}: +${(window.baganiLastStandBuff.defIncrease * 100)}% DEF for ${window.baganiLastStandBuff.turnsLeft} turns.`);
+        logDamage(`${player} used ${skill.name}: +${(window.baganiLastStandBuff.defIncrease * 100)}% DEF for ${window.baganiLastStandBuff.turnsLeft} turns.`);
         startCooldown(player, skillKey, skill.cooldown ?? 4);
         updateAllSkillCooldownDescriptions();
         setTimeout(() => updateAllStatusEffectsUI(), 50);
@@ -1885,7 +1948,7 @@ function attackEnemy(player, skillIndex) {
     // NEW: Purify (Babaylan) - remove all player debuffs
     if (player === 'player3' && skill && skill.remove_debuff && skill.hitsAll) {
         cleanseAllPlayersDebuffs();
-        console.log(`${player} used ${skill.name}: All player debuffs removed.`);
+        logDamage(`${player} used ${skill.name}: All player debuffs removed.`);
         startCooldown(player, skillKey, skill.cooldown ?? 2);
         updateAllSkillCooldownDescriptions();
         setTimeout(() => updateAllStatusEffectsUI(), 50);
@@ -1902,7 +1965,7 @@ function attackEnemy(player, skillIndex) {
             const selfHealPerc = Number(skill.self_heal) || 0;
             const selfHealAmount = Math.round(selfHealPerc * healAmount);
             adjustHP(player, selfHealAmount);
-            console.log(`${player} used ${skill.name}: Healed self for ${selfHealAmount}.`);
+            logDamage(`${player} used ${skill.name}: Healed self for ${selfHealAmount}.`);
         }
 
         // Sacrifice: consume HP then heal all allies except self
@@ -1910,11 +1973,11 @@ function attackEnemy(player, skillIndex) {
             const sac = Math.abs(skill.Hpflat_sac || 0);
             reduceHPIgnoringShield(player, sac);
             ['player1', 'player2', 'player4'].forEach(p => adjustHP(p, healAmount)); // Fixed - includes all players
-            console.log(`${player} used ${skill.name}: Sacrificed ${sac} HP and healed all allies for ${healAmount}.`);
+            logDamage(`${player} used ${skill.name}: Sacrificed ${sac} HP and healed all allies for ${healAmount}.`);
         } else {
             // Single-target heal - USE THE DETERMINED TARGET, not a new dropdown read
             adjustHP(target, healAmount); // ✅ Use the target determined at the beginning
-            console.log(`${player} used ${skill.name}: Healed ${target} for ${healAmount}.`);
+            logDamage(`${player} used ${skill.name}: Healed ${target} for ${healAmount}.`);
         }
 
         startCooldown(player, skillKey, skill.cooldown ?? 2);
@@ -1925,7 +1988,7 @@ function attackEnemy(player, skillIndex) {
     // Blessing buff
     if (skill && skill.blessing) {
         window.blessingBuff[target] = skill.duration || 2; // ✅ Use the determined target
-        console.log(`${player} used Blessing on ${target}: +20% pre-mitigation damage for ${skill.duration || 2} turns.`);
+        logDamage(`${player} used Blessing on ${target}: +20% pre-mitigation damage for ${skill.duration || 2} turns.`);
         startCooldown(player, skillKey, skill.cooldown ?? 3);
         updateAllSkillCooldownDescriptions();
         setTimeout(() => updateAllStatusEffectsUI(), 50);
@@ -1939,7 +2002,7 @@ function attackEnemy(player, skillIndex) {
             const shieldAmount = Math.round(maxHp * skill.maxHp_perc);
             addShield('player2', shieldAmount, 2, { unstackable: false });
             updateHPAndShieldUI('player2');
-            console.log(`player2 used ${skill.name}: Gained ${shieldAmount} shield (total ${playersStats.player2.shield}).`);
+            logDamage(`player2 used ${skill.name}: Gained ${shieldAmount} shield (total ${playersStats.player2.shield}).`);
             startCooldown(player, skillKey, skill.cooldown ?? 2);
             updateAllSkillCooldownDescriptions();
             return;
@@ -1949,7 +2012,7 @@ function attackEnemy(player, skillIndex) {
             const sacAmount = Math.round((playersStats.player2.hp || 0) * skill.currHP_sac);
             const shieldValuePerAlly = Math.round((playersStats.player2.hp || 0) * skill.currHP_shield);
             if (sacAmount <= 0) {
-                console.log('Not enough HP to sacrifice for Guardian\'s Oath.');
+                logDamage('Not enough HP to sacrifice for Guardian\'s Oath.');
                 return;
             }
             reduceHPIgnoringShield('player2', sacAmount);
@@ -1958,7 +2021,7 @@ function attackEnemy(player, skillIndex) {
                 if (isDead(p)) return;
                 addShield(p, shieldValuePerAlly, 2, { unstackable: true });
             });
-            console.log(`player2 used ${skill.name}: Sacrificed ${sacAmount} HP and granted ${shieldValuePerAlly} shield to all allies.`);
+            logDamage(`player2 used ${skill.name}: Sacrificed ${sacAmount} HP and granted ${shieldValuePerAlly} shield to all allies.`);
             startCooldown(player, skillKey, skill.cooldown ?? 2);
             updateAllSkillCooldownDescriptions();
             return;
@@ -1975,7 +2038,7 @@ function attackEnemy(player, skillIndex) {
 
     // Check invulnerability
     if ((target === 'boss' || target === 'boss2') && window.bossInvulnerable?.turnsLeft > 0) {
-        console.log(`Attack negated: Boss invulnerable (${window.bossInvulnerable.turnsLeft} turns left).`);
+        logDamage(`Attack negated: Boss invulnerable (${window.bossInvulnerable.turnsLeft} turns left).`);
         damage = 0;
     }
 
@@ -1987,13 +2050,13 @@ function attackEnemy(player, skillIndex) {
         if (skill.name && (skill.name.includes('Volley') || skill.name.includes('Explosive'))) {
             // Hit main boss
             adjustHP('boss', -damage);
-            console.log(`${player} used ${skill.name} on Bakunawa: (Dealt ${damage})`);
+            logDamage(`${player} used ${skill.name} on Bakunawa: (Dealt ${damage})`);
 
             // Hit second boss if active
             if (window.bakunawaPhase2Active && playersStats.boss2.hp > 0) {
                 const damage2 = calculateDamage(player, 'boss2', skill.damagePercent, skill.flatdamage, skill.magPercentDamage || 0, skill.defIgnore || 0);
                 adjustHP('boss2', -damage2);
-                console.log(`${player} used ${skill.name} on Minokawa: (Dealt ${damage2})`);
+                logDamage(`${player} used ${skill.name} on Minokawa: (Dealt ${damage2})`);
             }
 
             // Check phase transition
@@ -2005,7 +2068,7 @@ function attackEnemy(player, skillIndex) {
         } else {
             // Single target attack
             adjustHP(target, -damage);
-            console.log(`${player} used ${skill.name} on ${target}: (Dealt ${damage})`);
+            logDamage(`${player} used ${skill.name} on ${target}: (Dealt ${damage})`);
 
             // Check phase transition for boss
             if (target === 'boss') {
@@ -2027,7 +2090,7 @@ function attackEnemy(player, skillIndex) {
     if (!window.dungeonBuff3Active) {
         startCooldown(player, skillKey, skill.cooldown ?? 2);
     } else {
-        console.log(`${player} used ${skill.name}: No cooldown applied (Dungeon Buff 3 active).`);
+        logDamage(`${player} used ${skill.name}: No cooldown applied (Dungeon Buff 3 active).`);
     }
     updateAllSkillCooldownDescriptions();
 }
@@ -2036,14 +2099,14 @@ function attackEnemy(player, skillIndex) {
 // Heals the entity selected in the healer's target dropdown
 function healSelectedTarget(healer, healAmount) {
     if (isDead(healer)) {
-        console.log(`${healer} cannot heal: entity is dead.`);
+        logDamage(`${healer} cannot heal: entity is dead.`);
         return;
     }
 
     const skillKey = `heal-${healAmount}`;
     // Check cooldown (dungeon buff 3 bypasses this via isOnCooldown)
     if (isOnCooldown(healer, skillKey)) {
-        console.log(`${healer} heal is on cooldown (${cooldowns[healer][skillKey]} rounds left).`);
+        logDamage(`${healer} heal is on cooldown (${cooldowns[healer][skillKey]} rounds left).`);
         return;
     }
 
@@ -2052,7 +2115,7 @@ function healSelectedTarget(healer, healAmount) {
     if (!playersStats[target]) return;
 
     adjustHP(target, Math.abs(healAmount));
-    console.log(`${healer} healed ${target} for ${Math.abs(healAmount)} HP`);
+    logDamage(`${healer} healed ${target} for ${Math.abs(healAmount)} HP`);
 
     // Only start cooldown if dungeon buff 3 is not active
     if (!window.dungeonBuff3Active) {
@@ -2069,13 +2132,30 @@ function resurrect(entity, hpPercent = 0.5) {
         const newHp = Math.round(maxHp * hpPercent);
         playersStats[entity].hp = newHp;
 
-        console.log(`${entity} has been resurrected with ${newHp} HP!`);
+        logDamage(`${entity} has been resurrected with ${newHp} HP!`);
 
         // Restore visual indicators
         const hpBar = document.getElementById(`hp-${entity}`);
         if (hpBar) hpBar.style.backgroundColor = ''; // Remove gray
 
         updateHPAndShieldUI(entity);
+    }
+}
+
+function logDamage(message) {
+    const damageLog = document.getElementById('damage-log');
+    if (!damageLog) return;
+
+    const logEntry = document.createElement('div');
+    logEntry.textContent = message;
+    logEntry.style.marginBottom = '2px';
+
+    // Add to top of log (newest first)
+    damageLog.insertBefore(logEntry, damageLog.firstChild);
+
+    // Keep only last 20 messages
+    while (damageLog.children.length > 20) {
+        damageLog.removeChild(damageLog.lastChild);
     }
 }
 
