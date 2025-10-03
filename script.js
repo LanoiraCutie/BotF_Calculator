@@ -43,31 +43,31 @@ const presets = {
 
 const playerSkills = {
     player1: [
-        { name: "Attack", flatdamage: 50, damagePercent: 1.5, cooldown: 1, description: "Attack: Deals 50 (+150% ATK) to the boss." },
-        { name: "Heavy Attack", damagePercent: 3.34, cooldown: 2, description: "Heavy Attack: Deals 334% ATK to the boss." },
-        { name: "All-in Attack", damagePercent: 8.34, cooldown: 3, description: "All-in Attack: Deals 834% ATK to the boss." },
+        { name: "Attack", flatdamage: 50, damagePercent: 1.5, cooldown: 1, description: "Deals fair damage." },
+        { name: "Heavy Attack", damagePercent: 3.34, cooldown: 2, description: "Deals heavy damage." },
+        { name: "All-in Attack", damagePercent: 8.34, cooldown: 3, description: "Deals massive damage." },
         { name: "Rest", remove_debuff: true, cooldown: 3, description: "Removes negative status effects for self." },
-        { name: "Berserk", HP_requirement_from_maxHP_below: 0.51, mandirigma_rage: true, dmgMultiplier_increase: 0.5, defIgnore: 0.2, duration: 3, cooldown: 4, description: "Rage: Increases damage by 50% and ignores 20% DEF for 2 turns." }
+        { name: "Berserk", HP_requirement_from_maxHP_below: 0.51, mandirigma_rage: true, dmgMultiplier_increase: 0.5, defIgnore: 0.2, duration: 3, cooldown: 4, description: "Increases damage for 2 turns." }
     ],
     player2: [
-        { name: "Shield Bash", flatdamage: 50, damagePercent: 1, cooldown: 1, description: "Deals 50 (+100% ATK) to the boss." },
-        { name: "Fortify", maxHp_perc: 0.3, cooldown: 4, description: "Gain shield equal to +30% max HP for 2 turns." },
-        { name: "Last Stand", HP_requirement_from_maxHP_below: 0.2, last_stand: true, defIncrease: 0.5, cooldown: 4, description: "If HP <20%, gain +50% defense for 3 turns." },
-        { name: "Guardian’s Oath ", currHP_sac: 0.25, currHP_shield: 0.25, cooldown: 4, description: "Sacrifice 25% current HP, shield all ally for amount of 25% current HP, unstackable." }
+        { name: "Shield Bash", flatdamage: 50, damagePercent: 1, cooldown: 1, description: "Deals small damage to the boss." },
+        { name: "Fortify", maxHp_perc: 0.3, cooldown: 4, description: "Gain shield for himself for 2 turns." },
+        { name: "Last Stand", HP_requirement_from_maxHP_below: 0.2, last_stand: true, defIncrease: 0.5, cooldown: 4, description: "Gain defense, if low HP for 3 turns." },
+        { name: "Guardian’s Oath ", currHP_sac: 0.25, currHP_shield: 0.25, cooldown: 4, description: "Sacrifice HP, shield all allies, unstackable." }
     ],
     player3: [
-        { name: "Heal", heal_flat: 100, magPercent_heal: 0.5, self_heal: 0.5, cooldown: 2, description: "Restore HP equivalent to 100 (+50% MAG) to ally, and heals self for 50% of the amount." },
-        { name: "Blessing", blessing: true, duration: 2, dmgMultiplier_increase: 0.5, cooldown: 3, description: "+20% dmg buff to ally (2 turns)." },
-        { name: "Mana Surge", damagePercent: 1, cooldown: 2, description: "Deals 100% MAG to the enemy." },
+        { name: "Heal", heal_flat: 100, magPercent_heal: 0.5, self_heal: 0.5, cooldown: 2, description: "Restore HP to ally, and heals self." },
+        { name: "Blessing", blessing: true, duration: 2, dmgMultiplier_increase: 0.5, cooldown: 3, description: "Buffs ally dmg (2 turns)." },
+        { name: "Mana Surge", damagePercent: 1, cooldown: 2, description: "Deals damage to the enemy." },
         { name: "Purify", remove_debuff: true, hitsAll: true, cooldown: 2, description: "Removes all debuff to all players." },
-        { name: "Sacrifice ", Hpflat_sac: 200, heal_flat: 50, magPercent_heal: 1, cooldown: 3, description: "Lose 200 HP, heal all allies HP equivalent to 150% -> 50 (+100% MAG)" },
+        { name: "Sacrifice ", Hpflat_sac: 200, heal_flat: 50, magPercent_heal: 1, cooldown: 3, description: "Lose HP, heal all allies HP" },
     ],
     player4: [
-        { name: "Quick Shot", flatdamage: 150, damagePercent: 1.5, cooldown: 1, description: "Deals 150 (+ 150% ATK) damage to the enemy." },
-        { name: "Piercing Arrow", damagePercent: 2.25, defIgnore: 1, cooldown: 3, description: "Deals 225% ATK damage and ignores defense." },
-        { name: "Volley", flatdamage: 50, damagePercent: 1, cooldown: 1, description: "Deals 50 + 100% ATK each to all enemies." },
-        { name: "Focus Aim", focused_aim: true, duration: 2, defIgnore_buff: 0.2, cooldown: 4, description: "Next 2 attacks ignore 20% of enemy DEF." },
-        { name: "Explosive Arrow ", flatdamage: 300, damagePercent: 5, cooldown: 3, description: "Deals 300 (+ 500% ATK) to all enemies." }
+        { name: "Quick Shot", flatdamage: 150, damagePercent: 1.5, cooldown: 1, description: "Deals fair damage." },
+        { name: "Piercing Arrow", damagePercent: 2.25, defIgnore: 1, cooldown: 3, description: "Deals big damage, ignores defense." },
+        { name: "Volley", flatdamage: 50, damagePercent: 1, cooldown: 1, description: "Deals fair damage to all enemies." },
+        { name: "Focus Aim", focused_aim: true, duration: 2, defIgnore_buff: 0.2, cooldown: 4, description: "Next 2 attacks ignore some DEF." },
+        { name: "Explosive Arrow ", flatdamage: 300, damagePercent: 5, cooldown: 3, description: "Deals massive damage to all enemies." }
     ]
 };
 
@@ -148,39 +148,41 @@ window.dungeonBuff1Active = false; // +15% DMG to all players
 window.dungeonBuff2Active = false; // +25% DEF to all players  
 window.dungeonBuff3Active = false; // No cooldown for all skills
 window.currentBossName = null; // Track current boss for change detection
+window.deadBosses = new Set(); // Track which bosses have been permanently defeated
+window.deadPlayers = new Set(); // Track which players have been permanently defeated
 
 function resetAllBuffsDebuffsAndCooldowns() {
     console.log('Resetting all buffs, debuffs, and cooldowns due to boss change...');
-    
+
     // Reset all player cooldowns
     ['player1', 'player2', 'player3', 'player4'].forEach(player => {
         cooldowns[player] = {};
     });
-    
+
     // Clear all buff/debuff timers (but preserve checkbox-activated ones)
     const preserveDungeon1 = window.dungeonBuff1Active;
-    const preserveDungeon2 = window.dungeonBuff2Active; 
+    const preserveDungeon2 = window.dungeonBuff2Active;
     const preserveDungeon3 = window.dungeonBuff3Active;
     const preserveCrit = window.critActive;
-    
+
     // Reset boss buffs/debuffs
     window.bathalaMandateBuff = { turnsLeft: 0, defIncrease: 0 };
     window.daybreakFuryBuff = { turnsLeft: 0, atkIncrease: 0, defIgnore: 0 };
     window.strengthenedBuff = {};
     window.bossInvulnerable = { turnsLeft: 0 };
-    
+
     // Reset player buffs/debuffs
     window.mandirigmaRageBuff = { turnsLeft: 0, dmgIncrease: 0, defIgnore: 0 };
     window.baganiLastStandBuff = { turnsLeft: 0, defIncrease: 0 };
     window.blessingBuff = {};
     window.focusAimBuff = {};
-    
+
     // Clear all debuffs
     window.bindDebuffs = {};
     window.devouredDebuffs = {};
     window.eyeDragonDebuffs = {};
     window.moonfallDebuffs = {};
-    
+
     // Clear all shields
     ['player1', 'player2', 'player3', 'player4', 'boss', 'boss2'].forEach(entity => {
         if (playersStats[entity]) {
@@ -188,36 +190,77 @@ function resetAllBuffsDebuffsAndCooldowns() {
             playersStats[entity].shieldStacks = [];
         }
     });
-    
+
     // Restore checkbox-activated buffs
     window.dungeonBuff1Active = preserveDungeon1;
     window.dungeonBuff2Active = preserveDungeon2;
     window.dungeonBuff3Active = preserveDungeon3;
     window.critActive = preserveCrit;
-    
+
+    // Preserve dead bosses before clearing deadEntities
+    const bossSelect = document.getElementById('preset-entity');
+    const selectedPreset = bossSelect ? bossSelect.value : null;
+    const shouldKeepBossDead = selectedPreset && window.deadBosses.has(selectedPreset);
+
     // Clear dead entities (resurrect all)
     window.deadEntities.clear();
-    
-    // Reset HP to max for all entities
+
+    // Immediately re-add boss to deadEntities if it should stay dead
+    if (shouldKeepBossDead) {
+        window.deadEntities.add('boss');
+        playersStats.boss.hp = 0; // Ensure HP is also 0
+    }
+
+    // Reset HP to max for all entities (except bosses - let applyPreset handle them)
     ['player1', 'player2', 'player3', 'player4', 'boss'].forEach(entity => {
         if (playersStats[entity] && playersStats[entity].maxHp) {
-            playersStats[entity].hp = playersStats[entity].maxHp;
+            if (entity === 'boss') {
+                // Only reset boss HP if it's not supposed to stay dead
+                if (!window.deadEntities.has('boss')) {
+                    playersStats[entity].hp = playersStats[entity].maxHp;
+                }
+                // If boss should stay dead, leave HP at 0
+            } else if (window.deadPlayers.has(entity)) {
+                // Keep dead players dead
+                playersStats[entity].hp = 0;
+                window.deadEntities.add(entity);
+                console.log(`${entity} remains dead from previous defeat.`);
+            } else {
+                // Resurrect alive players
+                playersStats[entity].hp = playersStats[entity].maxHp;
+            }
         }
     });
-    
+
     // Update all UI elements
     ['player1', 'player2', 'player3', 'player4', 'boss'].forEach(entity => {
         updateHPAndShieldUI(entity);
         const label = document.getElementById(`stats-hp-${entity}`);
-        if (label) label.innerText = playersStats[entity].hp;
+        const hpBar = document.getElementById(`hp-${entity}`);
+
+        if ((entity === 'boss' && window.deadEntities.has('boss')) ||
+            (entity !== 'boss' && window.deadPlayers.has(entity))) {
+            // Show dead state
+            if (label) label.innerText = '0 (DEAD)';
+            if (hpBar) {
+                hpBar.style.width = '0%';
+                hpBar.style.backgroundColor = '#666';
+            }
+        } else {
+            // Show alive state
+            if (label) label.innerText = playersStats[entity].hp;
+            if (hpBar && entity === 'boss') {
+                hpBar.style.backgroundColor = '#4caf50';
+            }
+        }
     });
-    
+
     // Update skill descriptions to show reset cooldowns
     updateAllSkillCooldownDescriptions();
-    
+
     // Update status effects UI
     updateAllStatusEffectsUI();
-    
+
     console.log('Reset complete: All buffs, debuffs, shields, and cooldowns cleared. HP restored to max.');
 }
 
@@ -225,11 +268,11 @@ function resetAllBuffsDebuffsAndCooldowns() {
 function updateStatusEffectsUI(entity) {
     const container = document.getElementById(`status-effects-${entity}`);
     if (!container) return;
-    
+
     container.innerHTML = ''; // Clear existing effects
-    
+
     const effects = [];
-    
+
     // Check buffs (green)
     if (entity === 'player1' && window.mandirigmaRageBuff?.turnsLeft > 0) {
         effects.push({
@@ -239,7 +282,7 @@ function updateStatusEffectsUI(entity) {
             description: 'dmg+50%, defignore+20%'
         });
     }
-    
+
     if (entity === 'player2' && window.baganiLastStandBuff?.turnsLeft > 0) {
         effects.push({
             name: 'Last Stand',
@@ -248,7 +291,7 @@ function updateStatusEffectsUI(entity) {
             description: 'def+50%'
         });
     }
-    
+
     if (window.blessingBuff && window.blessingBuff[entity] > 0) {
         effects.push({
             name: 'Blessing',
@@ -257,7 +300,7 @@ function updateStatusEffectsUI(entity) {
             description: 'dmg+20%'
         });
     }
-    
+
     if (window.focusAimBuff && window.focusAimBuff[entity]?.turnsLeft > 0) {
         effects.push({
             name: 'Focus Aim',
@@ -266,7 +309,7 @@ function updateStatusEffectsUI(entity) {
             description: 'defignore+20%'
         });
     }
-    
+
     if (entity === 'boss' && window.bathalaMandateBuff?.turnsLeft > 0) {
         effects.push({
             name: "Heaven's Mandate",
@@ -275,7 +318,7 @@ function updateStatusEffectsUI(entity) {
             description: 'def+30%'
         });
     }
-    
+
     if (entity === 'boss' && window.daybreakFuryBuff?.turnsLeft > 0) {
         effects.push({
             name: 'Daybreak Fury',
@@ -284,7 +327,7 @@ function updateStatusEffectsUI(entity) {
             description: 'atk+40%, defignore+20%'
         });
     }
-    
+
     if (entity === 'boss' && window.strengthenedBuff?.boss?.attacksLeft > 0) {
         effects.push({
             name: 'Strengthened',
@@ -293,7 +336,7 @@ function updateStatusEffectsUI(entity) {
             description: 'next dmg x2'
         });
     }
-    
+
     if (entity === 'boss' && window.bossInvulnerable?.turnsLeft > 0) {
         effects.push({
             name: 'Invulnerable',
@@ -302,7 +345,7 @@ function updateStatusEffectsUI(entity) {
             description: 'immune to damage'
         });
     }
-    
+
     // Check debuffs (red)
     if (window.bindDebuffs && window.bindDebuffs[entity]) {
         effects.push({
@@ -312,7 +355,7 @@ function updateStatusEffectsUI(entity) {
             description: 'def-15%'
         });
     }
-    
+
     if (window.moonfallDebuffs && window.moonfallDebuffs[entity]) {
         effects.push({
             name: 'Moonfall',
@@ -321,7 +364,7 @@ function updateStatusEffectsUI(entity) {
             description: 'def-20%'
         });
     }
-    
+
     if (window.eyeDragonDebuffs && window.eyeDragonDebuffs[entity]) {
         effects.push({
             name: 'Eye of the Dragon',
@@ -330,7 +373,7 @@ function updateStatusEffectsUI(entity) {
             description: 'def-10%'
         });
     }
-    
+
     if (window.devouredDebuffs && window.devouredDebuffs[entity]) {
         effects.push({
             name: 'Devoured',
@@ -339,7 +382,7 @@ function updateStatusEffectsUI(entity) {
             description: 'DoT 20%MAG'
         });
     }
-    
+
     // Global dungeon buffs (only show on players if active)
     if (entity !== 'boss' && entity !== 'boss2') {
         if (window.dungeonBuff1Active) {
@@ -350,7 +393,7 @@ function updateStatusEffectsUI(entity) {
                 description: 'dmg+15%'
             });
         }
-        
+
         if (window.dungeonBuff2Active) {
             effects.push({
                 name: 'Daragang Buff',
@@ -359,7 +402,7 @@ function updateStatusEffectsUI(entity) {
                 description: 'def+25%'
             });
         }
-        
+
         if (window.dungeonBuff3Active) {
             effects.push({
                 name: 'Bundok Buff',
@@ -369,19 +412,19 @@ function updateStatusEffectsUI(entity) {
             });
         }
     }
-    
+
     // Create DOM elements for each effect
     effects.forEach(effect => {
         const effectDiv = document.createElement('div');
         effectDiv.className = `status-effect ${effect.type}`;
         effectDiv.title = effect.description; // Tooltip
-        
+
         if (effect.turns === '∞') {
             effectDiv.textContent = effect.name;
         } else {
             effectDiv.innerHTML = `${effect.name} <span class="turns">(${effect.turns})</span>`;
         }
-        
+
         container.appendChild(effectDiv);
     });
 }
@@ -418,10 +461,7 @@ function checkBakunawaPhase() {
     const bakunawaMaxHp = playersStats.boss.maxHp || playersStats.boss.hp || 1;
     const threshold = bakunawaMaxHp * 0.5;
 
-    console.log(`DEBUG: Checking phase - HP: ${bakunawaHp}, Max: ${bakunawaMaxHp}, 50% threshold: ${threshold}`);
-
     if (bakunawaHp <= threshold && bakunawaHp > 0) {
-        console.log('DEBUG: Phase 2 should trigger now!');
         window.bakunawaPhase2Active = true;
 
         const minokawaHp = Math.round(bakunawaHp * 0.5);
@@ -482,14 +522,14 @@ function updateBossUI() {
             
             <label for="entity-target">Target:</label>
             <select id="entity-target">
-                <option value="player1">Player 1</option>
-                <option value="player2">Player 2</option>
-                <option value="player3">Player 3</option>
-                <option value="player4">Player 4</option>
+                <option value="player1">Mandirigma</option>
+                <option value="player2">Bagani</option>
+                <option value="player3">Babaylan</option>
+                <option value="player4">Mangangayaw</option>
             </select>
-            
-            <div class="skills" id="bakunawa-skills">
-                <h3>Bakunawa Skills</h3>
+            <h3 align="center">Bakunawa Skills</h3>
+            <div class="boss-skills" id="bakunawa-skills">
+                
             </div>
             
             <h2>Minokawa</h2>
@@ -506,14 +546,14 @@ function updateBossUI() {
             
             <label for="minokawa-target">Target:</label>
             <select id="minokawa-target">
-                <option value="player1">Player 1</option>
-                <option value="player2">Player 2</option>
-                <option value="player3">Player 3</option>
-                <option value="player4">Player 4</option>
+                <option value="player1">Mandirigma</option>
+                <option value="player2">Bagani</option>
+                <option value="player3">Babaylan</option>
+                <option value="player4">Mangangayaw</option>
             </select>
-            
-            <div class="skills" id="minokawa-skills">
-                <h3>Minokawa Skills</h3>
+            <h3 align="center">Minokawa Skills</h3>
+            <div class="boss-skills" id="minokawa-skills">
+                
             </div>
             
             <div id="damage-log"></div>
@@ -573,20 +613,21 @@ function updateBossUI() {
             
             <label for="entity-target">Target:</label>
             <select id="entity-target">
-                <option value="player1">Player 1</option>
-                <option value="player2">Player 2</option>
-                <option value="player3">Player 3</option>
-                <option value="player4">Player 4</option>
+                <option value="player1">Mandirigma</option>
+                <option value="player2">Bagani</option>
+                <option value="player3">Babaylan</option>
+                <option value="player4">Mangangayaw</option>
             </select>
             
-            <div class="skills">
+            <h3 align="center">${currentPreset} Skills</h3>
+            <div class="boss-skills">
             </div>
             
             <div id="damage-log"></div>
         `;
 
         // Add single boss skills
-        const skillsContainer = bossContainer.querySelector('.skills');
+        const skillsContainer = bossContainer.querySelector('.skills') || bossContainer.querySelector('.boss-skills');
         const skills = window.bossSkills[currentPreset] || [];
         skills.forEach((skill, index) => {
             const skillDiv = document.createElement('div');
@@ -1053,6 +1094,9 @@ function isOnCooldown(player, skillKey) {
 function startCooldown(player, skillKey, durationRounds = 2) {
     if (!cooldowns[player]) cooldowns[player] = {};
     cooldowns[player][skillKey] = durationRounds;
+
+    // Immediately update button styling
+    updateAllSkillCooldownDescriptions();
 }
 
 function endRound() {
@@ -1146,19 +1190,30 @@ function updateAllSkillCooldownDescriptions() {
         const skillDivs = container.querySelectorAll('.skills .skill');
         const skills = playerSkills[playerId];
         if (!skills) return;
+        
         skills.forEach((skill, idx) => {
             const skillDiv = skillDivs[idx];
             if (!skillDiv) return;
+            
             const descEl = skillDiv.querySelector('.skill-description');
-            if (!descEl) return;
+            const button = skillDiv.querySelector('button');
+            if (!descEl || !button) return;
+            
             const remain = getRemainingCooldown(playerId, idx);
             const cdText = ` (CD: ${remain})`;
+            
             // Reset to base description then append CD
             descEl.innerText = `${skill.description}${cdText}`;
+            
+            // Update button styling based on cooldown
+            if (remain > 0) {
+                button.classList.add('on-cooldown');
+            } else {
+                button.classList.remove('on-cooldown');
+            }
         });
 
-        // Also handle extra heal buttons not tied to playerSkills indices
-        // player2 heal 30
+        // Handle extra heal buttons
         if (playerId === 'player2') {
             const healDiv = Array.from(skillDivs).find(div => {
                 const btn = div.querySelector('button');
@@ -1166,24 +1221,16 @@ function updateAllSkillCooldownDescriptions() {
             });
             if (healDiv) {
                 const descEl = healDiv.querySelector('.skill-description');
-                if (descEl) {
+                const button = healDiv.querySelector('button');
+                if (descEl && button) {
                     const remain = cooldowns.player2?.['heal-30'] || 0;
                     descEl.innerText = `Heal: Restores 30 HP to the selected ally. (CD: ${remain})`;
-                }
-            }
-        }
-
-        // player3 heal 50 (Resurrection)
-        if (playerId === 'player3') {
-            const healDiv = Array.from(skillDivs).find(div => {
-                const btn = div.querySelector('button');
-                return btn && btn.getAttribute('onclick') === "healSelectedTarget('player3', 50)";
-            });
-            if (healDiv) {
-                const descEl = healDiv.querySelector('.skill-description');
-                if (descEl) {
-                    const remain = cooldowns.player3?.['heal-50'] || 0;
-                    descEl.innerText = `Resurrection: Restores 50 HP to the selected ally. (CD: ${remain})`;
+                    
+                    if (remain > 0) {
+                        button.classList.add('on-cooldown');
+                    } else {
+                        button.classList.remove('on-cooldown');
+                    }
                 }
             }
         }
@@ -1205,7 +1252,19 @@ function applyPreset(player) {
         // Reset everything when boss actually changes (not on initial load)
         if (window.currentBossName !== selectedPreset) {
             console.log(`Boss changed from ${window.currentBossName} to ${selectedPreset}`);
+
+            // Check if the NEW boss should be dead BEFORE calling reset
+            const shouldNewBossStayDead = window.deadBosses.has(selectedPreset);
+
             resetAllBuffsDebuffsAndCooldowns();
+
+            // If the new boss should be dead, force it dead after reset
+            if (shouldNewBossStayDead) {
+                playersStats.boss.hp = 0;
+                window.deadEntities.add('boss');
+                console.log(`${selectedPreset} forced to remain dead after reset.`);
+            }
+
             window.currentBossName = selectedPreset; // Update stored boss name
         }
 
@@ -1237,16 +1296,35 @@ function applyPreset(player) {
     const hpEl = document.getElementById(`stats-hp-${player}`);
     const atkEl = document.getElementById(`stats-atk-${player}`);
     const defEl = document.getElementById(`stats-def-${player}`);
-    const magEl = player === 'boss' ? document.getElementById('stats-mag-boss') : null;
-    if (hpEl) hpEl.innerText = newStats.hp;
-    if (atkEl) atkEl.innerText = newStats.atk || newStats.mag || 0;
-    if (defEl) defEl.innerText = newStats.def;
-    if (magEl) magEl.innerText = newStats.mag || 0;
-
-    // Update the HP bar (full)
     const hpBar = document.getElementById(`hp-${player}`);
-    if (hpBar) {
-        hpBar.style.width = '100%';
+    const magEl = player === 'boss' ? document.getElementById('stats-mag-boss') : null;
+
+    if (player === 'boss' && window.deadBosses.has(selectedPreset)) {
+        playersStats[player].hp = 0;
+        window.deadEntities.add('boss');
+        console.log(`${selectedPreset} remains dead from previous defeat.`);
+
+        // Update ALL stats, not just HP
+        if (hpEl) hpEl.innerText = '0 (DEAD)';
+        if (atkEl) atkEl.innerText = newStats.atk || newStats.mag || 0;
+        if (defEl) defEl.innerText = newStats.def;
+        if (magEl) magEl.innerText = newStats.mag || 0;
+
+        if (hpBar) {
+            hpBar.style.width = '0%';
+            hpBar.style.backgroundColor = '#666';
+        }
+    } else {
+        // Normal alive state
+        if (hpEl) hpEl.innerText = newStats.hp;
+        if (atkEl) atkEl.innerText = newStats.atk || newStats.mag || 0;
+        if (defEl) defEl.innerText = newStats.def;
+        if (magEl) magEl.innerText = newStats.mag || 0;
+
+        if (hpBar) {
+            hpBar.style.width = '100%';
+            hpBar.style.backgroundColor = '#4caf50';
+        }
     }
 
     // Update UI after boss change
@@ -1254,8 +1332,9 @@ function applyPreset(player) {
         updateBossUI();
     }
 
-    // ensure UI elements for shield/hp exist/updated
-    updateHPAndShieldUI(player);
+    if (player !== 'boss' || !window.deadEntities.has('boss')) {
+        updateHPAndShieldUI(player);
+    }
 }
 
 // Fix 2: Replace updatePlayerTargetDropdowns with separate ally/enemy targeting
@@ -1426,15 +1505,30 @@ function isDead(entity) {
 }
 
 function markAsDead(entity) {
-    if (!isDead(entity)) {
+
+    if (!window.deadEntities.has(entity)) {
         window.deadEntities.add(entity);
+
+        if (entity.startsWith('player')) {
+            window.deadPlayers.add(entity);
+            console.log(`${entity} has been permanently defeated!`);
+        }
+
+        if (entity === 'boss') {
+            const bossSelect = document.getElementById('preset-entity');
+            const selectedPreset = bossSelect ? bossSelect.value : null;
+
+            if (selectedPreset) {
+                window.deadBosses.add(selectedPreset);
+            }
+        }
+
         console.log(`${entity} has been defeated!`);
 
-        // Visual indicator (optional)
+        // Visual indicator
         const hpBar = document.getElementById(`hp-${entity}`);
-        if (hpBar) hpBar.style.backgroundColor = '#666'; // Gray out HP bar
+        if (hpBar) hpBar.style.backgroundColor = '#666';
 
-        // Update UI to show dead state
         const label = document.getElementById(`stats-hp-${entity}`);
         if (label) label.innerText = '0 (DEAD)';
     }
@@ -1472,7 +1566,7 @@ function adjustHP(player, change) {
     }
 
     // Check for death
-    if (playersStats[player].hp <= 0 && !isDead(player)) {
+    if (playersStats[player].hp <= 0 && !window.deadEntities.has(player)) {
         markAsDead(player);
     }
 
@@ -1483,7 +1577,6 @@ function adjustHP(player, change) {
 
         // Check if HP crossed the 50% threshold
         if (originalHP > maxHP * 0.5 && newHP <= maxHP * 0.5 && newHP > 0) {
-            console.log(`DEBUG: HP crossed threshold! Original: ${originalHP}, New: ${newHP}, Threshold: ${maxHP * 0.5}`);
             checkBakunawaPhase();
         }
     }
@@ -1893,15 +1986,13 @@ function attackEnemy(player, skillIndex) {
         // AoE skills hit multiple targets
         if (skill.name && (skill.name.includes('Volley') || skill.name.includes('Explosive'))) {
             // Hit main boss
-            playersStats.boss.hp = Math.max(0, playersStats.boss.hp - damage);
-            updateHPAndShieldUI('boss');
+            adjustHP('boss', -damage);
             console.log(`${player} used ${skill.name} on Bakunawa: (Dealt ${damage})`);
 
             // Hit second boss if active
             if (window.bakunawaPhase2Active && playersStats.boss2.hp > 0) {
                 const damage2 = calculateDamage(player, 'boss2', skill.damagePercent, skill.flatdamage, skill.magPercentDamage || 0, skill.defIgnore || 0);
-                playersStats.boss2.hp = Math.max(0, playersStats.boss2.hp - damage2);
-                updateHPAndShieldUI('boss2');
+                adjustHP('boss2', -damage2);
                 console.log(`${player} used ${skill.name} on Minokawa: (Dealt ${damage2})`);
             }
 
@@ -1913,8 +2004,7 @@ function attackEnemy(player, skillIndex) {
             }
         } else {
             // Single target attack
-            playersStats[target].hp = Math.max(0, playersStats[target].hp - damage);
-            updateHPAndShieldUI(target);
+            adjustHP(target, -damage);
             console.log(`${player} used ${skill.name} on ${target}: (Dealt ${damage})`);
 
             // Check phase transition for boss
