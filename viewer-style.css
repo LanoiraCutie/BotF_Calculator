@@ -1,0 +1,503 @@
+/* Custom font */
+@font-face {
+    font-family: "BoldPixels";
+    src: url(font/BoldPixels-BF689223dae4f35.otf) format("opentype");
+}
+
+/* Base styles */
+body {
+    font-family: "BoldPixels", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: url('asset/Background.png') center/cover fixed no-repeat;
+    color: #f9f9f9;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.stream-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+/* Main layout grid */
+.battle-field {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: 1fr 30vw;
+    box-sizing: border-box;
+}
+
+/* Heroes section - left side */
+.heroes-section {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    padding: 6vh 2.7vw 2vh 3.1vw;
+}
+
+/* Special Items Container (Top Row) */
+.special-items-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    min-height: 15vh;
+    padding-top: 0.5vh;
+    border-radius: 12px;
+}
+
+.special-items-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Left for item, right for buff text */
+    align-items: center;
+    justify-content: space-between;
+    min-height: 60px;
+    padding: 0 3vw 0 1.75vw;
+    border-radius: 8px;
+    gap: 8px; /* Space between item and buff text */
+}
+
+.special-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    grid-column: 1; /* Left side */
+    padding-top: 4vh;
+}
+
+.special-item img {
+    width: 4.25vw;
+    height: auto;
+    border-radius: 2px;
+    object-fit: cover;
+}
+
+.special-item-text {
+    font-size: 1.5rem; /* Slightly larger for better visibility */
+    font-weight: bold;
+    color: #00ff00;
+    margin: -4.5vh 0 0 0.4vw;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+    grid-column: 2; /* Right side */
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: wrap;
+    min-width: fit-content;
+}
+
+/* When no item is active, hide the buff text completely */
+.special-item-text.empty {
+    display: none;
+}
+
+/* Heroes Container (Main Grid) */
+.heroes-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4vw;
+    border-radius: 12px;
+}
+
+/* Individual hero cards */
+.hero-card {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    width: 100%;
+    height: 100%;
+    padding: 0 10px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.hero-card.dead {
+    filter: grayscale(1);
+}
+
+/* Active Skill Section */
+.active-skill-section {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    max-height: 20vh;
+    max-width: 9vw;
+    margin-left: 2.25vw;
+    padding-top: 0.5vh;
+    border-radius: 8px;
+}
+
+.active-skill {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.skill-image {
+    width: 7.25vw;
+    height: 17.5vh;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.skill-name {
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #87ceeb;
+    text-align: center;
+    margin-top: 2px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+/* Hero Portrait */
+.hero-portrait {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 34vh;
+    margin-top: 0.9vh;
+}
+
+.character-image {
+    width: 100%;
+    height: 36vh;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.hero-portrait h3 {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #ffa500;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+/* Hero Stats */
+.hero-stats {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    max-height: 6vh;
+    padding: 0 5px 5px 5px;
+    border-radius: 8px;
+}
+
+.hp-section {
+    width: 96%;
+}
+
+.hp-bar {
+    position: relative;
+    width: 100%;
+    height: 2vh;
+    background-color: rgba(0, 0, 0, 1);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    margin-bottom: 4px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.hp-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50 0%, #81c784 100%);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    z-index: 1;
+}
+
+.hp-shield {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700 0%, #ffeb3b 100%);
+    border-radius: 4px;
+    opacity: 0.9;
+    transition: width 0.5s ease;
+    z-index: 2;
+}
+
+.hp-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #008000;
+}
+
+.shield-text {
+    color: #b8860b;
+}
+
+/* Status Effects */
+.status-effects-section {
+    max-height: 6vh;
+    height: 4vh;
+    border-radius: 8px;
+    overflow-y: auto;
+    padding: 0 10px 0 110px;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 2px;
+}
+
+.status-effects {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+/* Upper row for buffs */
+.status-effects.buffs {
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+/* Lower row for debuffs */
+.status-effects.debuffs {
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.status-effect {
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-size: 0.55rem;
+    font-weight: bold;
+    color: black;
+    white-space: nowrap;
+    text-shadow: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.status-effect.buff {
+    background: linear-gradient(135deg, #90EE90 0%, #98FB98 100%);
+    border: 1px solid #228B22;
+}
+
+.status-effect.debuff {
+    background: linear-gradient(135deg, #FFB6C1 0%, #FFA0B4 100%);
+    border: 1px solid #DC143C;
+}
+
+.status-effect .turns {
+    font-weight: normal;
+    opacity: 0.8;
+}
+
+/* Boss section - right side */
+.boss-section {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 340px 40px 90px 20px;
+}
+
+.boss-card.dead {
+    filter: grayscale(1);
+}
+
+/* Boss Portrait */
+.boss-portrait {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    padding: 0 110px 0 130px;
+    border-radius: 12px;
+}
+
+.boss-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    object-fit: cover;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8);
+}
+
+.boss-portrait h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ff4444;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+/* Boss Stats */
+.boss-stats {
+    min-height: 80px;
+    padding: 6px 105px 0 140px;
+    border-radius: 8px;
+}
+
+.boss-hp {
+    height: 20px;
+    margin-bottom: 8px;
+}
+
+.boss-stats .hp-text {
+    font-size: 1.5rem;
+    color: #008000;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.boss-stats .def-text {
+    color: #b8860b;
+}
+
+/* Boss Active Skill */
+.boss-card .active-skill-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px;
+    max-width: 19.5vw;
+    margin-left: 80px;
+    padding: 15px 0 0 0;
+    border-radius: 8px;
+}
+
+.boss-card .active-skill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.boss-card .skill-name {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #da70d6;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+/* Boss Status Effects */
+.boss-card .status-effects-section {
+    height: 50px;
+    margin: 0;
+    padding: 35px 110px 0 230px;
+    border-radius: 8px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 2px;
+}
+
+/* Hide section headers */
+.special-items-section h4,
+.active-skill-section h4,
+.status-effects-section h4 {
+    display: none;
+}
+
+/* Scrollbar styling */
+.status-effects-section::-webkit-scrollbar,
+.boss-card .status-effects-section::-webkit-scrollbar {
+    width: 4px;
+}
+
+.status-effects-section::-webkit-scrollbar-track,
+.boss-card .status-effects-section::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.status-effects-section::-webkit-scrollbar-thumb,
+.boss-card .status-effects-section::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .battle-field {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto;
+    }
+    
+    .heroes-section {
+        padding: 60px 20px 20px 20px;
+    }
+    
+    .special-items-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .heroes-container {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .boss-section {
+        padding: 20px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+}
+
+@media (max-width: 900px) {
+    .heroes-section {
+        padding: 40px 10px 10px 10px;
+    }
+    
+    .special-items-container {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+    
+    .heroes-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, 1fr);
+    }
+    
+    .boss-section {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 600px) {
+    .character-image {
+        width: 50px;
+        height: 65px;
+    }
+    
+    .boss-image {
+        width: 100px;
+        height: 130px;
+    }
+    
+    .hero-card {
+        gap: 3px;
+        padding: 5px;
+    }
+    
+    .special-items-container {
+        grid-template-columns: 1fr 1fr;
+    }
+}

@@ -4,403 +4,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BotF Calculator</title>
-    <link rel="stylesheet" href="style.css">
+    <title>BotF Live Stream</title>
+    <link rel="stylesheet" href="viewer-style.css">
 </head>
 
 <body>
-    <div class="players-container">
-        <h1 align="center">Balangay of the Forgotten (BotF) Calculator</h1>
-        <h2 style="margin: 0;">Round: <span id="round-counter">1</span></h2>
-        <button onclick="endRound()">End Round</button>
-        <button onclick="resetAllBuffsDebuffsAndCooldowns()">Reset All</button>
-        <span>Cooldowns reduce by 1 each round.</span>
-        <div style="margin-bottom:10px;">
-            <div class="buff-controls">
-                <label>
-                    <input type="checkbox" id="crit-checkbox" onchange="window.critActive=this.checked;">
-                    Critical Hit (+50% DMG)
-                </label>
-                <br>
-                <label>
-                    <input type="checkbox" id="dungeon-buff1-checkbox"
-                        onchange="window.dungeonBuff1Active=this.checked; updateAllStatusEffectsUI();">
-                    Dagat ng Kabisayaan (+15% DMG to all)
-                </label>
-                <br>
-                <label>
-                    <input type="checkbox" id="dungeon-buff2-checkbox"
-                        onchange="window.dungeonBuff2Active=this.checked; updateAllStatusEffectsUI();">
-                    Daragang Magayon (+25% DEF to all players)
-                </label>
-                <br>
-                <label>
-                    <input type="checkbox" id="dungeon-buff3-checkbox"
-                        onchange="window.dungeonBuff3Active=this.checked; updateAllStatusEffectsUI();">
-                    Bundok Pulag (No Cooldown for all skills)
-                </label>
+    <div class="stream-container">
+        <div class="battle-field">
+            <!-- Heroes Section -->
+            <div class="heroes-section">
+                <!-- GREEN: Special Items Container (Top Row) - Global -->
+                <div class="special-items-container">
+                    <div class="special-items-section" id="special-items-1">
+                        <!-- Dagat ng Kabisayaan -->
+                    </div>
+                    <div class="special-items-section" id="special-items-2">
+                        <!-- Daragang Magayon -->
+                    </div>
+                    <div class="special-items-section" id="special-items-3">
+                        <!-- Bundok Pulag -->
+                    </div>
+                    <div class="special-items-section" id="special-items-4">
+                        <!-- Reserved/Blank -->
+                    </div>
+                </div>
+
+                <!-- PINK: Heroes Container (Main Grid) -->
+                <div class="heroes-container">
+                    <!-- Player 1 Card -->
+                    <div class="hero-card" id="player1-card">
+                        <!-- BLUE: Active skill -->
+                        <div class="active-skill-section">
+                            <div class="active-skill" id="active-skill-player1">
+                                <img src="asset/skills/default.png" alt="No skill" class="skill-image">
+                            </div>
+                        </div>
+
+                        <!-- ORANGE: Hero portrait -->
+                        <div class="hero-portrait">
+                            <img src="asset/ANIMATION ON CARDS/MandirigmaCard.gif" alt="Mandirigma"
+                                class="character-image">
+                        </div>
+
+                        <!-- YELLOW: HP/Shield stats -->
+                        <div class="hero-stats">
+                            <div class="hp-section">
+                                <div class="hp-bar">
+                                    <div class="hp-fill" id="hp-player1"></div>
+                                    <div class="hp-shield" id="shield-player1"></div>
+                                </div>
+                                <div class="hp-text">
+                                    <span>HP: <span id="stats-hp-player1">100</span></span>
+                                    <span class="shield-text">SH: <span id="stats-shield-player1">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GRAY: Status effects -->
+                        <div class="status-effects-section">
+                            <div class="status-effects buffs" id="status-effects-player1-buffs"></div>
+                            <div class="status-effects debuffs" id="status-effects-player1-debuffs"></div>
+                        </div>
+                    </div>
+
+                    <!-- Player 2 Card -->
+                    <div class="hero-card" id="player2-card">
+                        <div class="active-skill-section">
+                            <div class="active-skill" id="active-skill-player2">
+                                <img src="asset/skills/default.png" alt="No skill" class="skill-image">
+                            </div>
+                        </div>
+                        <div class="hero-portrait">
+                            <img src="asset/ANIMATION ON CARDS/BaganiCard.gif" alt="Bagani" class="character-image">
+                        </div>
+                        <div class="hero-stats">
+                            <div class="hp-section">
+                                <div class="hp-bar">
+                                    <div class="hp-fill" id="hp-player2"></div>
+                                    <div class="hp-shield" id="shield-player2"></div>
+                                </div>
+                                <div class="hp-text">
+                                    <span>HP: <span id="stats-hp-player2">100</span></span>
+                                    <span class="shield-text">SH: <span id="stats-shield-player2">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="status-effects-section">
+                            <div class="status-effects buffs" id="status-effects-player2-buffs"></div>
+                            <div class="status-effects debuffs" id="status-effects-player2-debuffs"></div>
+                        </div>
+                    </div>
+
+                    <!-- Player 3 Card -->
+                    <div class="hero-card" id="player3-card">
+                        <div class="active-skill-section">
+                            <div class="active-skill" id="active-skill-player3">
+                                <img src="asset/skills/default.png" alt="No skill" class="skill-image">
+                            </div>
+                        </div>
+                        <div class="hero-portrait">
+                            <img src="asset/ANIMATION ON CARDS/BabaylanCard.gif" alt="Babaylan" class="character-image">
+                        </div>
+                        <div class="hero-stats">
+                            <div class="hp-section">
+                                <div class="hp-bar">
+                                    <div class="hp-fill" id="hp-player3"></div>
+                                    <div class="hp-shield" id="shield-player3"></div>
+                                </div>
+                                <div class="hp-text">
+                                    <span>HP: <span id="stats-hp-player3">100</span></span>
+                                    <span class="shield-text">SH: <span id="stats-shield-player3">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="status-effects-section">
+                            <div class="status-effects buffs" id="status-effects-player3-buffs"></div>
+                            <div class="status-effects debuffs" id="status-effects-player3-debuffs"></div>
+                        </div>
+                    </div>
+
+                    <!-- Player 4 Card -->
+                    <div class="hero-card" id="player4-card">
+                        <div class="active-skill-section">
+                            <div class="active-skill" id="active-skill-player4">
+                                <img src="asset/skills/default.png" alt="No skill" class="skill-image">
+                            </div>
+                        </div>
+                        <div class="hero-portrait">
+                            <img src="asset/ANIMATION ON CARDS/MangagayawCard.gif" alt="Mangangayaw"
+                                class="character-image">
+                        </div>
+                        <div class="hero-stats">
+                            <div class="hp-section">
+                                <div class="hp-bar">
+                                    <div class="hp-fill" id="hp-player4"></div>
+                                    <div class="hp-shield" id="shield-player4"></div>
+                                </div>
+                                <div class="hp-text">
+                                    <span>HP: <span id="stats-hp-player4">100</span></span>
+                                    <span class="shield-text">SH: <span id="stats-shield-player4">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="status-effects-section">
+                            <div class="status-effects buffs" id="status-effects-player4-buffs"></div>
+                            <div class="status-effects debuffs" id="status-effects-player4-debuffs"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-        </div>
-        <div class="player-container">
-            <h2>Mandirigma</h2>
-            <div class="controls">
-                <label for="preset-player1">Select Preset:</label>
-                <select id="preset-player1" onchange="applyPreset('player1')">
-                    <option value="glassCanon">Glass Canon</option>
-                    <option value="bruiser">Bruiser</option>
-                    <option value="berserker">Berserker</option>
-                </select>
-                <br>
-                <label for="enemy-target-player1">Attack Target:</label>
-                <select id="enemy-target-player1">
-                    <option value="boss">Boss</option>
-                </select>
-                <br>
-                <label>
-                    <input type="checkbox" id="bonecracked-checkbox">
-                    Inflict Bone Cracked (-10% DEF for 1 turn)
-                </label>
-            </div>
-            <div class="hp-bar">
-                <div class="hp-fill" id="hp-player1" style="width: 100%;"></div>
-            </div>
-            <div class="stats">
-                <div class="stat">HP: <span id="stats-hp-player1">100</span></div>
-                <div class="stat">ATK: <span id="stats-atk-player1">20</span></div>
-                <div class="stat">DEF: <span id="stats-def-player1">10</span></div>
-            </div>
-            <div class="status-effects" id="status-effects-player1"></div>
-            <div class="skills">
-                <div class="skill">
-                    <button onclick="attackEnemy('player1', 0)">Skill 1</button>
-                    <div class="skill-description">Attack: Deals 150% ATK to the boss. (CD: 2)</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player1', 1)">Skill 2</button>
-                    <div class="skill-description">Heavy Attack: Deals 334% ATK to the boss. (CD: 2)</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player1', 2)">Skill 3</button>
-                    <div class="skill-description">All-in Attack: Deals 834% ATK to the boss. (CD: 2)</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player1', 3)">Skill 4</button>
-                    <div class="skill-description">All-in Attack: Deals 834% ATK to the boss. (CD: 2)</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player1', 4)">Skill 3</button>
-                    <div class="skill-description">All-in Attack: Deals 834% ATK to the boss. (CD: 2)</div>
-                </div>
-            </div>
-        </div>
+            <!-- Boss Section -->
+            <div class="boss-section">
+                <div class="boss-card" id="boss-card">
+                    <!-- RED: Boss portrait -->
+                    <div class="boss-portrait">
+                        <img src="asset/bosses/bathala.png" alt="Boss" class="boss-image" id="boss-image">
+                    </div>
 
-        <div class="player-container">
-            <h2>Bagani</h2>
-            <div class="controls">
-                <label for="preset-player2">Select Preset:</label>
-                <select id="preset-player2" onchange="applyPreset('player2')">
-                    <option value="wall">Wall</option>
-                    <option value="juggernaut">Juggernaut</option>
-                    <option value="damageSoaker">Damage Soaker</option>
-                </select>
-                <br>
-                <label for="enemy-target-player2">Attack Target:</label>
-                <select id="enemy-target-player2">
-                    <option value="boss">Boss</option>
-                </select>
-                <label for="ally-target-player2">Support Target:</label>
-                <select id="ally-target-player2">
-                    <option value="player1">Mandirigma</option>
-                    <option value="player2">Bagani</option>
-                    <option value="player3">Babaylan</option>
-                    <option value="player4">Mangangayaw</option>
-                </select>
-            </div>
-            <div class="hp-bar">
-                <div class="hp-fill" id="hp-player2" style="width: 100%;"></div>
-            </div>
-            <div class="stats">
-                <div class="stat">HP: <span id="stats-hp-player2">100</span></div>
-                <div class="stat">ATK: <span id="stats-atk-player2">25</span></div>
-                <div class="stat">DEF: <span id="stats-def-player2">15</span></div>
-            </div>
-            <div class="status-effects" id="status-effects-player2"></div>
-            <div class="skills">
-                <div class="skill">
-                    <button onclick="attackEnemy('player2', 0)">Skill 1</button>
-                    <div class="skill-description">Shield Bash: Deals damage to the boss. (CD: 2)</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player2', 1)">Skill 2</button>
-                    <div class="skill-description">Defensive Strike: Deals damage to the boss. (CD: 2)</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player2', 2)">Skill 3</button>
-                    <div class="skill-description">Counterattack: Deals damage to the boss. (CD: 2)</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player2', 3)">Skill 4</button>
-                    <div class="skill-description">Counterattack: Deals damage to the boss. (CD: 2)</div>
-                </div>
-            </div>
-        </div>
+                    <!-- DARK RED: Boss stats -->
+                    <div class="boss-stats">
+                        <div class="hp-section">
+                            <div class="hp-bar boss-hp">
+                                <div class="hp-fill" id="hp-boss"></div>
+                            </div>
+                            <div class="hp-text">
+                                <span>HP: <span id="stats-hp-boss">2800</span></span>
+                                <div class="def-text">
+                                    <span>DEF: <span id="stats-def-boss">30</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="player-container">
-            <h2>Babaylan</h2>
-            <div class="controls">
-                <label for="preset-player3">Select Preset:</label>
-                <select id="preset-player3" onchange="applyPreset('player3')">
-                    <option value="pureHealer">Pure Healer</option>
-                    <option value="supportCleric">Support Cleric</option>
-                    <option value="battlePriest">Battle Priest</option>
-                </select>
-                <br>
-                <label for="enemy-target-player3">Attack Target:</label>
-                <select id="enemy-target-player3">
-                    <option value="boss">Boss</option>
-                </select>
-                <label for="ally-target-player3">Support Target:</label>
-                <select id="ally-target-player3">
-                    <option value="player1">Mandirigma</option>
-                    <option value="player2">Bagani</option>
-                    <option value="player3">Babaylan</option>
-                    <option value="player4">Mangangayaw</option>
-                </select>
-            </div>
-            <div class="hp-bar">
-                <div class="hp-fill" id="hp-player3" style="width: 100%;"></div>
-            </div>
-            <div class="stats">
-                <div class="stat">HP: <span id="stats-hp-player3">100</span></div>
-                <div class="stat">MAG: <span id="stats-atk-player3">30</span></div>
-                <div class="stat">DEF: <span id="stats-def-player3">20</span></div>
-            </div>
-            <div class="status-effects" id="status-effects-player3"></div>
-            <div class="skills">
-                <div class="skill">
-                    <button onclick="attackEnemy('player3', 0)">Skill 1</button>
-                    <div class="skill-description">Holy Blast: Deals damage to the boss. (CD: 2)</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player3', 1)">Skill 2</button>
-                    <div class="skill-description">Divine Shield: Deals damage to the boss. (CD: 2)</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player3', 2)">Skill 3</button>
-                    <div class="skill-description">Blessing of Strength: Deals damage to the boss. (CD: 2)</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player3', 3)">Skill 4</button>
-                    <div class="skill-description">Resurrection Blast: Deals damage to the boss. (CD: 2)</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player3', 4)">Skill 4</button>
-                    <div class="skill-description">Resurrection Blast: Deals damage to the boss. (CD: 2)</div>
-                </div>
-            </div>
-        </div>
+                    <!-- PURPLE: Active skill (text only) -->
+                    <div class="active-skill-section">
+                        <div class="active-skill" id="active-skill-boss">
+                            <span class="skill-name">None</span>
+                        </div>
+                    </div>
 
-        <div class="player-container">
-            <h2>Mangangayaw</h2>
-            <div class="controls">
-                <label for="preset-player4">Select Preset:</label>
-                <select id="preset-player4" onchange="applyPreset('player4')">
-                    <option value="sniper">Sniper</option>
-                    <option value="ranger">Ranger</option>
-                    <option value="hunter">Hunter</option>
-                </select>
-                <br>
-                <label for="enemy-target-player4">Attack Target:</label>
-                <select id="enemy-target-player4">
-                    <option value="boss">Boss</option>
-                </select>
-            </div>
-            <div class="hp-bar">
-                <div class="hp-fill" id="hp-player4" style="width: 100%;"></div>
-            </div>
-            <div class="stats">
-                <div class="stat">HP: <span id="stats-hp-player4">100</span></div>
-                <div class="stat">ATK: <span id="stats-atk-player4">35</span></div>
-                <div class="stat">DEF: <span id="stats-def-player4">25</span></div>
-            </div>
-            <div class="status-effects" id="status-effects-player4"></div>
-            <div class="skills">
-                <div class="skill">
-                    <button onclick="attackEnemy('player4', 0)">Skill 1</button>
-                    <div class="skill-description">Arrow Shot: Deals 15 damage to the selected target. (CD: 2)</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player4', 1)">Skill 2</button>
-                    <div class="skill-description">Piercing Arrow: Deals 25 damage to the selected target.</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player4', 2)">Skill 3</button>
-                    <div class="skill-description">Explosive Shot: Deals 35 damage to the selected target.</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player4', 3)">Skill 4</button>
-                    <div class="skill-description">Hunter's Mark: Deals 50 damage to the selected target.</div>
-                </div>
-                <div class="skill">
-                    <button onclick="attackEnemy('player4', 4)">Skill 5</button>
-                    <div class="skill-description">Hunter's Mark: Deals 50 damage to the selected target.</div>
+                    <!-- WHITE: Status effects -->
+                    <div class="status-effects-section">
+                        <div class="status-effects buffs" id="status-effects-boss-buffs"></div>
+                        <div class="status-effects debuffs" id="status-effects-boss-debuffs"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="boss-container">
-        <h2>Boss</h2>
-        <label for="preset-entity">Select Preset:</label>
-        <select id="preset-entity" onchange="applyPreset('boss')">
-            <option value="Bathala">Bathala</option>
-            <option value="Mayari">Mayari</option>
-            <option value="Apolaki">Apolaki</option>
-            <option value="Bakunawa">Bakunawa</option>
-            <option value="Manananggal">Manananggal</option>
-            <option value="Tiyanak">Tiyanak</option>
-            <option value="Siren">Siren</option>
-            <option value="Kapre">Kapre</option>
-        </select>
-        <div class="hp-bar">
-            <div class="hp-fill" id="hp-boss" style="width: 100%;"></div>
-        </div>
-        <div class="stats">
-            <div class="stat">HP: <span id="stats-hp-boss">200</span></div>
-            <div class="stat">ATK: <span id="stats-atk-boss">50</span></div>
-            <div class="stat">MAG: <span id="stats-mag-boss">50</span></div>
-            <div class="stat">DEF: <span id="stats-def-boss">30</span></div>
-        </div>
-
-        <div class="boss-skills" id="boss-skills">
-            <label for="entity-target">Select Target:</label>
-            <select id="entity-target">
-                <option value="player1">Mandirigma</option>
-                <option value="player2">Bagani</option>
-                <option value="player3">Babaylan</option>
-                <option value="player4">Mangangayaw</option>
-            </select>
-            <br><br>
-            <!-- Boss skill buttons/descriptions will be dynamically updated -->
-            <div class="skill">
-                <button id="boss-skill-1" onclick="entityAttack(0)">Skill 1</button>
-                <div class="skill-description" id="boss-skill-desc-1">Skill 1 description</div>
-            </div>
-            <div class="skill">
-                <button id="boss-skill-2" onclick="entityAttack(1)">Skill 2</button>
-                <div class="skill-description" id="boss-skill-desc-2">Skill 2 description</div>
-            </div>
-            <div class="skill">
-                <button id="boss-skill-3" onclick="entityAttack(2)">Skill 3</button>
-                <div class="skill-description" id="boss-skill-desc-3">Skill 3 description</div>
-            </div>
-            <div class="skill">
-                <button id="boss-skill-4" onclick="entityAttack(3)">Skill 4</button>
-                <div class="skill-description" id="boss-skill-desc-4">Skill 4 description</div>
-            </div>
-        </div>
-        <!-- Add damage log output here -->
-        <div id="damage-log"
-            style="margin-top:16px; min-height:80px; max-height:180px; overflow-y:auto; background:#222; color:#fff; font-size:14px; border-radius:6px; padding:8px;">
-        </div>
-        <div class="logo-container">
-            <img src="asset/Balangay of the Forgotten.png" alt="Balangay of the Forgotten" class="game-logo">
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-    <script>
-        function updateBossSkillButtons() {
-            // Get selected preset
-            var bossSelect = document.getElementById('preset-entity');
-            var selectedPreset = bossSelect ? bossSelect.value : 'Bathala';
-            // bossSkills is defined in script.js
-            var skills = (typeof bossSkills !== 'undefined') ? bossSkills[selectedPreset] : null;
-            if (!skills) return;
-            for (var i = 0; i < 4; i++) {
-                var btn = document.getElementById('boss-skill-' + (i + 1));
-                var desc = document.getElementById('boss-skill-desc-' + (i + 1));
-                if (btn && skills[i]) btn.innerText = skills[i].name;
-                if (desc && skills[i]) desc.innerText = skills[i].description;
-            }
-        }
-
-        // Update player buttons to show skill names from playerSkills
-        function updatePlayerSkillButtons() {
-            var playerIds = ['player1', 'player2', 'player3', 'player4'];
-            var playerContainers = document.querySelectorAll('.players-container .player-container');
-            playerIds.forEach(function (pid, idx) {
-                var container = playerContainers[idx];
-                if (!container) return;
-                var skillDivs = container.querySelectorAll('.skills .skill');
-                var skills = (typeof playerSkills !== 'undefined') ? playerSkills[pid] : null;
-                if (!skills) return;
-                skills.forEach(function (skill, sidx) {
-                    var skillDiv = skillDivs[sidx];
-                    if (!skillDiv) return;
-                    var btn = skillDiv.querySelector('button');
-                    if (!btn) return;
-                    btn.innerText = skill.name;
-                });
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            applyPreset('player1');
-            applyPreset('player2');
-            applyPreset('player3');
-            applyPreset('player4');
-            applyPreset('boss');
-            updateBossSkillButtons();
-            updatePlayerSkillButtons();
-            updateBossUI();
-            updatePlayerTargetDropdowns();
-            updateAllStatusEffectsUI();
-            if (typeof updateAllSkillCooldownDescriptions === 'function') {
-                updateAllSkillCooldownDescriptions();
-            }
-            if (typeof currentRound !== 'undefined') {
-                const rc = document.getElementById('round-counter');
-                if (rc) rc.innerText = String(currentRound);
-            }
-            var bossSelect = document.getElementById('preset-entity');
-            if (bossSelect) {
-                bossSelect.addEventListener('change', function () {
-                    applyPreset('boss');
-                    updateBossSkillButtons();
-                    updatePlayerSkillButtons();
-                });
-            }
-
-            const dungeonBuff3Checkbox = document.getElementById('dungeon-buff3-checkbox');
-            if (dungeonBuff3Checkbox) {
-                dungeonBuff3Checkbox.addEventListener('change', function () {
-                    window.dungeonBuff3Active = this.checked;
-
-                    if (this.checked) {
-                        // Immediately clear all player cooldowns
-                        ['player1', 'player2', 'player3', 'player4'].forEach(player => {
-                            if (cooldowns[player]) {
-                                Object.keys(cooldowns[player]).forEach(skillKey => {
-                                    cooldowns[player][skillKey] = 0;
-                                });
-                            }
-                        });
-
-                        console.log('Bundok Pulag activated: All cooldowns cleared immediately!');
-                        logDamage('Bundok Pulag: All skill cooldowns reset to 0!');
-                        updateAllSkillCooldownDescriptions();
-                    } else {
-                        console.log('Bundok Pulag deactivated: Normal cooldown rules apply.');
-                        logDamage('Bundok Pulag deactivated: Cooldowns will apply normally.');
-                    }
-                });
-            } else {
-                console.error('Bundok Pulag checkbox not found!');
-            }
-        });
-    </script>
+    <script src="viewer.js"></script>
 </body>
 
 </html>
