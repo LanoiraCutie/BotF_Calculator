@@ -4,24 +4,41 @@
     src: url(font/BoldPixels-BF689223dae4f35.otf) format("opentype");
 }
 
-/* Base styles */
+/* Fixed Resolution Scaling - Container approach */
 body {
-    font-family: "BoldPixels", Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background: url('asset/Background.png') center/cover fixed no-repeat;
-    color: #f9f9f9;
-    min-height: 100vh;
     overflow: hidden;
+    font-family: "BoldPixels", Arial, sans-serif;
 }
 
-.stream-container {
+.resolution-scaler {
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+}
+
+.fixed-layout {
+    width: 1920px;
+    height: 1080px;
+    transform-origin: center center;
+    transform: scale(min(calc(100vw / 1920), calc(100vh / 1080)));
+    background: url('asset/Background.png') center/cover no-repeat;
+    color: #f9f9f9;
     position: relative;
 }
 
-/* Main layout grid */
+.stream-container {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+}
+
+/* Main layout grid - FIXED PIXELS ONLY */
 .battle-field {
     position: absolute;
     top: 0;
@@ -29,37 +46,39 @@ body {
     right: 0;
     bottom: 0;
     display: grid;
-    grid-template-columns: 1fr 30vw;
+    grid-template-columns: 1344px 576px; /* 70% and 30% of 1920px */
     box-sizing: border-box;
+    width: 1920px;
+    height: 1080px;
 }
 
-/* Heroes section - left side */
+/* Heroes section - left side - FIXED PIXELS */
 .heroes-section {
     position: relative;
     display: grid;
-    grid-template-rows: auto 1fr;
-    padding: 6vh 2.7vw 2vh 3.1vw;
+    grid-template-rows: 162px 918px; /* 15% and 85% of 1080px */
+    padding: 65px 52px 22px 60px;
 }
 
-/* Special Items Container (Top Row) */
+/* Special Items Container (Top Row) - FIXED PIXELS */
 .special-items-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
-    min-height: 15vh;
-    padding-top: 0.5vh;
+    height: 162px;
+    padding-top: 5px;
     border-radius: 12px;
 }
 
 .special-items-section {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Left for item, right for buff text */
+    grid-template-columns: 1fr 1fr;
     align-items: center;
     justify-content: space-between;
-    min-height: 60px;
-    padding: 0 3vw 0 1.75vw;
+    height: 100%;
+    padding: 0 58px 0 34px;
     border-radius: 8px;
-    gap: 8px; /* Space between item and buff text */
+    gap: 8px;
 }
 
 .special-item {
@@ -69,49 +88,49 @@ body {
     width: 100%;
     height: 100%;
     border-radius: 4px;
-    grid-column: 1; /* Left side */
-    padding-top: 4vh;
+    grid-column: 1;
+    padding-top: 43px;
 }
 
 .special-item img {
-    width: 4.25vw;
+    width: 82px; /* 4.25vw of 1920px */
     height: auto;
     border-radius: 2px;
     object-fit: cover;
 }
 
 .special-item-text {
-    font-size: 1.5rem; /* Slightly larger for better visibility */
+    font-size: 24px;
     font-weight: bold;
     color: #00ff00;
-    margin: -4.5vh 0 0 0.4vw;
+    margin: -49px 0 0 8px;
     text-align: center;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
-    grid-column: 2; /* Right side */
+    grid-column: 2;
     padding: 2px 6px;
     border-radius: 4px;
     white-space: wrap;
     min-width: fit-content;
 }
 
-/* When no item is active, hide the buff text completely */
 .special-item-text.empty {
     display: none;
 }
 
-/* Heroes Container (Main Grid) */
+/* Heroes Container (Main Grid) - FIXED PIXELS */
 .heroes-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.4vw;
+    gap: 8px;
     border-radius: 12px;
+    height: 918px;
 }
 
-/* Individual hero cards */
+/* Individual hero cards - FIXED PIXELS */
 .hero-card {
     position: relative;
     display: grid;
-    grid-template-rows: auto auto auto auto;
+    grid-template-rows: 216px 389px 65px 86px; /* Fixed heights */
     width: 100%;
     height: 100%;
     padding: 0 10px;
@@ -123,15 +142,15 @@ body {
     filter: grayscale(1);
 }
 
-/* Active Skill Section */
+/* Active Skill Section - FIXED PIXELS */
 .active-skill-section {
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    max-height: 20vh;
-    max-width: 9vw;
-    margin-left: 2.25vw;
-    padding-top: 0.5vh;
+    height: 216px;
+    width: 173px;
+    margin-left: 43px;
+    padding-top: 10px;
     border-radius: 8px;
 }
 
@@ -144,14 +163,14 @@ body {
 }
 
 .skill-image {
-    width: 7.25vw;
-    height: 17.5vh;
+    width: 139px; /* 7.25vw of 1920px */
+    height: 189px; /* 17.5vh of 1080px */
     border-radius: 6px;
     object-fit: cover;
 }
 
 .skill-name {
-    font-size: 0.7rem;
+    font-size: 11px;
     font-weight: bold;
     color: #87ceeb;
     text-align: center;
@@ -159,38 +178,39 @@ body {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
 }
 
-/* Hero Portrait */
+/* Hero Portrait - FIXED PIXELS */
 .hero-portrait {
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 34vh;
-    margin-top: 0.9vh;
+    height: 389px;
+    margin-top: 31px;
 }
 
 .character-image {
     width: 100%;
-    height: 36vh;
+    height: 389px;
     border-radius: 6px;
     object-fit: cover;
 }
 
 .hero-portrait h3 {
     margin: 0;
-    font-size: 0.8rem;
+    font-size: 13px;
     font-weight: bold;
     color: #ffa500;
     text-align: center;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
 }
 
-/* Hero Stats */
+/* Hero Stats - FIXED PIXELS */
 .hero-stats {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    max-height: 6vh;
+    height: 65px;
+    margin-top: 48px;
     padding: 0 5px 5px 5px;
     border-radius: 8px;
 }
@@ -202,7 +222,7 @@ body {
 .hp-bar {
     position: relative;
     width: 100%;
-    height: 2vh;
+    height: 22px; /* 2vh of 1080px */
     background-color: rgba(0, 0, 0, 1);
     border: 1px solid rgba(255, 255, 255, 0.7);
     border-radius: 6px;
@@ -236,7 +256,7 @@ body {
 .hp-text {
     display: flex;
     justify-content: space-between;
-    font-size: 1.5rem;
+    font-size: 24px;
     font-weight: bold;
     color: #008000;
 }
@@ -245,16 +265,16 @@ body {
     color: #b8860b;
 }
 
-/* Status Effects */
+/* Status Effects - FIXED PIXELS */
 .status-effects-section {
-    max-height: 6vh;
-    height: 4vh;
+    height: 50px;
     border-radius: 8px;
     overflow-y: auto;
     padding: 0 10px 0 110px;
     display: grid;
     grid-template-rows: 1fr 1fr;
     gap: 2px;
+    margin-top: 80px;
 }
 
 .status-effects {
@@ -264,13 +284,11 @@ body {
     gap: 2px;
 }
 
-/* Upper row for buffs */
 .status-effects.buffs {
     justify-content: flex-start;
     align-items: flex-start;
 }
 
-/* Lower row for debuffs */
 .status-effects.debuffs {
     justify-content: flex-start;
     align-items: flex-start;
@@ -279,7 +297,7 @@ body {
 .status-effect {
     padding: 1px 4px;
     border-radius: 4px;
-    font-size: 0.55rem;
+    font-size: 9px;
     font-weight: bold;
     color: black;
     white-space: nowrap;
@@ -302,27 +320,29 @@ body {
     opacity: 0.8;
 }
 
-/* Boss section - right side */
+/* Boss section - right side - FIXED PIXELS */
 .boss-section {
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 15px;
     padding: 340px 40px 90px 20px;
+    width: 576px;
+    height: 1080px;
 }
 
 .boss-card.dead {
     filter: grayscale(1);
 }
 
-/* Boss Portrait */
+/* Boss Portrait - FIXED PIXELS */
 .boss-portrait {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 200px;
-    padding: 0 110px 0 130px;
+    padding: 0 170px 0 130px;
     border-radius: 12px;
 }
 
@@ -337,17 +357,17 @@ body {
 
 .boss-portrait h3 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 24px;
     font-weight: bold;
     color: #ff4444;
     text-align: center;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
 }
 
-/* Boss Stats */
+/* Boss Stats - FIXED PIXELS */
 .boss-stats {
     min-height: 80px;
-    padding: 6px 105px 0 140px;
+    padding: 6px 165px 0 140px;
     border-radius: 8px;
 }
 
@@ -357,7 +377,7 @@ body {
 }
 
 .boss-stats .hp-text {
-    font-size: 1.5rem;
+    font-size: 24px;
     color: #008000;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
 }
@@ -366,15 +386,15 @@ body {
     color: #b8860b;
 }
 
-/* Boss Active Skill */
+/* Boss Active Skill - FIXED PIXELS */
 .boss-card .active-skill-section {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 60px;
-    max-width: 19.5vw;
+    height: 62px;
+    width: 374px; /* 19.5vw of 1920px */
     margin-left: 80px;
-    padding: 15px 0 0 0;
+    padding: 20px 0 0 0;
     border-radius: 8px;
 }
 
@@ -390,23 +410,124 @@ body {
 }
 
 .boss-card .skill-name {
-    font-size: 1.3rem;
+    font-size: 21px;
     font-weight: bold;
     color: #da70d6;
     text-align: center;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
 }
 
-/* Boss Status Effects */
+/* Boss Status Effects - FIXED PIXELS */
 .boss-card .status-effects-section {
     height: 50px;
     margin: 0;
-    padding: 35px 110px 0 230px;
+    padding: 30px 110px 0 240px;
+    border-radius: 8px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+}
+
+/* Minokawa Phase - Dual Boss Layout - FIXED PIXELS */
+.boss-portrait-dual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    padding: 43px 0 0 0;
+    border-radius: 12px;
+    max-width: 202px; /* 10.5vw of 1920px */
+}
+
+.boss-stats-dual {
+    min-height: 80px;
+    padding: 0 3px;
+    border-radius: 8px;
+    width: 195px;
+}
+
+.boss-stats-dual .hp-text {
+    padding-top: 11px;
+    font-size: 22px;
+    color: #008000;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.boss-stats-dual .def-text {
+    color: #b8860b;
+}
+
+.boss-stats-dual .hp-section {
+    width: 100%;
+}
+
+.boss-image-dual {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    object-fit: cover;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8);
+}
+
+.status-effects-section-dual {
+    height: 50px;
+    margin-top: 22px;
+    padding: 0 5px 0 85px;
     border-radius: 8px;
     overflow-y: auto;
     display: grid;
     grid-template-rows: 1fr 1fr;
     gap: 2px;
+    width: 200px; /* 11vw of 1920px */
+}
+
+.boss-active-skill-unified {
+    text-align: center;
+    padding: 20px;
+    border-radius: 12px;
+    grid-column: 1 / 3 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+    min-height: 60px;
+    position: relative;
+}
+
+.boss-active-skill-unified .active-skill-section {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.boss-active-skill-unified .active-skill {
+    width: 100% !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.boss-active-skill-unified .skill-name {
+    font-size: 21px;
+    font-weight: bold;
+    color: #da70d6;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100% !important;
+    max-width: none !important;
 }
 
 /* Hide section headers */
@@ -434,70 +555,4 @@ body {
     border-radius: 4px;
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .battle-field {
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr auto;
-    }
-    
-    .heroes-section {
-        padding: 60px 20px 20px 20px;
-    }
-    
-    .special-items-container {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .heroes-container {
-        grid-template-columns: 1fr 1fr;
-    }
-    
-    .boss-section {
-        padding: 20px;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: space-around;
-    }
-}
-
-@media (max-width: 900px) {
-    .heroes-section {
-        padding: 40px 10px 10px 10px;
-    }
-    
-    .special-items-container {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 1fr 1fr;
-    }
-    
-    .heroes-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: repeat(4, 1fr);
-    }
-    
-    .boss-section {
-        padding: 15px;
-    }
-}
-
-@media (max-width: 600px) {
-    .character-image {
-        width: 50px;
-        height: 65px;
-    }
-    
-    .boss-image {
-        width: 100px;
-        height: 130px;
-    }
-    
-    .hero-card {
-        gap: 3px;
-        padding: 5px;
-    }
-    
-    .special-items-container {
-        grid-template-columns: 1fr 1fr;
-    }
-}
+/* Remove all responsive design - not needed with fixed scaling */

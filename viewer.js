@@ -10,6 +10,7 @@ class GameViewer {
             player4: null,
             boss: null
         };
+        this.currentBackground = 'Background.png'; // Track current background
         this.init();
     }
 
@@ -62,8 +63,222 @@ class GameViewer {
         this.updateHeroes(gameState);
         this.updateBoss(gameState);
         this.updateActionLog(gameState.actionLog);
-        this.updateLastSkills(gameState.actionLog);
-        this.updateGlobalDungeonBuffs(gameState); // Update global dungeon buffs
+        this.updateGlobalDungeonBuffs(gameState);
+        this.handleMinokawaPhase(gameState); // Handle phase transition
+        if (gameState.actionLog && gameState.actionLog.length > 0) {
+            this.updateLastSkills(gameState.actionLog);
+        }
+    }
+
+    // NEW: Handle Minokawa phase transition
+    handleMinokawaPhase(gameState) {
+    const isMinokawaActive = gameState.bakunawaPhase2Active;
+    const shouldChangeBackground = isMinokawaActive && this.currentBackground !== 'Background_Mino.png';
+    const shouldRevertBackground = !isMinokawaActive && this.currentBackground !== 'Background.png';
+
+    // Change background when phase changes
+    if (shouldChangeBackground) {
+        this.changeBackground('Background_Mino.png'); // Make sure this matches your actual file
+        this.updateBossLayoutForMinokawa(gameState);
+    } else if (shouldRevertBackground) {
+        this.changeBackground('Background.png');
+        this.updateBossLayoutForSingle(gameState);
+    }
+}
+
+    // Change background image
+    changeBackground(backgroundFile) {
+    // Target the correct element that has the background in CSS
+    const fixedLayout = document.querySelector('.fixed-layout');
+    if (fixedLayout) {
+        fixedLayout.style.backgroundImage = `url('asset/${backgroundFile}')`;
+        fixedLayout.style.backgroundSize = 'cover';
+        fixedLayout.style.backgroundPosition = 'center';
+        fixedLayout.style.backgroundRepeat = 'no-repeat';
+        this.currentBackground = backgroundFile;
+        console.log(`Background changed to: ${backgroundFile}`);
+    } else {
+        console.error('Fixed layout container not found for background change');
+    }
+}
+
+    // Update boss layout for Minokawa phase (dual bosses)
+    updateBossLayoutForMinokawa(gameState) {
+        const bossSection = document.querySelector('.boss-section');
+        if (!bossSection) return;
+
+        // Clear existing content
+        bossSection.innerHTML = '';
+
+        // Create dual boss grid layout with FIXED PIXEL dimensions
+        bossSection.style.cssText = `
+        position: relative;
+        display: grid;
+        grid-template-columns: 200px 200px;
+        grid-template-rows: auto auto;
+        gap: 0 23px;
+        padding: 340px 73px 90px 80px;
+        width: 576px;
+        height: 650px;
+    `;
+
+        // Bakunawa (left side) - FIXED DIMENSIONS
+        const bakunawaCard = document.createElement('div');
+        bakunawaCard.className = 'boss-card';
+        bakunawaCard.id = 'boss-card';
+        bakunawaCard.style.cssText = 'grid-column: 1; grid-row: 1; width: 200px;';
+        bakunawaCard.innerHTML = `
+        <!-- Boss portrait -->
+        <div class="boss-portrait-dual">
+            <img src="asset/ALL CARDS/BOSS CARDS/bakunawaFinal.jpg" alt="Bakunawa" class="boss-image-dual">
+        </div>
+
+        <!-- Boss stats -->
+        <div class="boss-stats-dual">
+            <div class="hp-section">
+                <div class="hp-bar boss-hp">
+                    <div class="hp-fill" id="hp-boss"></div>
+                </div>
+                <div class="hp-text">
+                    <span>HP: <span id="stats-hp-boss">${gameState.playersStats?.boss?.hp || 0}</span></span>
+                    <div class="def-text">
+                        <span>DEF: <span id="stats-def-boss">${gameState.playersStats?.boss?.def || 0}</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status effects -->
+        <div class="status-effects-section-dual">
+            <div class="status-effects buffs" id="status-effects-boss-buffs"></div>
+            <div class="status-effects debuffs" id="status-effects-boss-debuffs"></div>
+        </div>
+    `;
+
+        // Minokawa (right side) - FIXED DIMENSIONS
+        const minokawaCard = document.createElement('div');
+        minokawaCard.className = 'boss-card';
+        minokawaCard.id = 'boss2-card';
+        minokawaCard.style.cssText = 'grid-column: 2; grid-row: 1; width: 200px;';
+        minokawaCard.innerHTML = `
+        <!-- Boss portrait -->
+        <div class="boss-portrait-dual">
+            <img src="asset/ALL CARDS/BOSS CARDS/minokawaFinal.jpg" alt="Minokawa" class="boss-image-dual">
+        </div>
+
+        <!-- Boss stats -->
+        <div class="boss-stats-dual">
+            <div class="hp-section">
+                <div class="hp-bar boss-hp">
+                    <div class="hp-fill" id="hp-boss2"></div>
+                </div>
+                <div class="hp-text">
+                    <span>HP: <span id="stats-hp-boss2">${gameState.playersStats?.boss2?.hp || 0}</span></span>
+                    <div class="def-text">
+                        <span>DEF: <span id="stats-def-boss2">${gameState.playersStats?.boss2?.def || 0}</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status effects -->
+        <div class="status-effects-section-dual">
+            <div class="status-effects buffs" id="status-effects-boss2-buffs"></div>
+            <div class="status-effects debuffs" id="status-effects-boss2-debuffs"></div>
+        </div>
+    `;
+
+        // Single Active Skill section (spans both columns) - FIXED DIMENSIONS
+        const activeSkillSection = document.createElement('div');
+        activeSkillSection.className = 'boss-active-skill-unified';
+
+        // Force exact positioning for fixed layout
+        activeSkillSection.style.cssText = `
+        grid-column: 1 / 3;
+        grid-row: 2;
+        width: 521px;
+        height: 60px;
+        text-align: center;
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 10px;
+        box-sizing: border-box;
+        position: relative;
+    `;
+
+        activeSkillSection.innerHTML = `
+        <div class="active-skill-section" style="margin: 0; padding: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+            <div class="active-skill" id="active-skill-boss" style="width: 100%; display: flex; justify-content: center; align-items: center;">
+                <span class="skill-name" style="font-size: 21px; font-weight: bold; color: #da70d6; text-align: center; width: 100%;">No recent boss action</span>
+            </div>
+        </div>
+    `;
+
+        // Add all elements to boss section
+        bossSection.appendChild(bakunawaCard);
+        bossSection.appendChild(minokawaCard);
+        bossSection.appendChild(activeSkillSection);
+
+        // Update HP bars and status effects
+        this.updateBossHP(gameState.playersStats?.boss, 'boss');
+        this.updateBossHP(gameState.playersStats?.boss2, 'boss2');
+        this.updateBossStatusEffects(gameState);
+        this.updateMinokawaStatusEffects(gameState);
+    }
+
+    // Update boss layout for single boss
+    updateBossLayoutForSingle(gameState) {
+        const bossSection = document.querySelector('.boss-section');
+        if (!bossSection) return;
+
+        // Reset to single boss layout
+        bossSection.style.display = 'flex';
+        bossSection.style.flexDirection = 'column';
+        bossSection.style.gridTemplateColumns = '';
+        bossSection.style.gridTemplateRows = '';
+        bossSection.style.padding = '340px 40px 90px 20px';
+
+        // Clear and recreate single boss layout
+        bossSection.innerHTML = `
+            <div class="boss-card" id="boss-card">
+                <!-- RED: Boss portrait -->
+                <div class="boss-portrait">
+                    <img src="asset/ALL CARDS/BOSS CARDS/${gameState.currentBoss?.toLowerCase() || 'bathala'}Final.jpg" alt="Boss" class="boss-image" id="boss-image">
+                </div>
+
+                <!-- DARK RED: Boss stats -->
+                <div class="boss-stats">
+                    <div class="hp-section">
+                        <div class="hp-bar boss-hp">
+                            <div class="hp-fill" id="hp-boss"></div>
+                        </div>
+                        <div class="hp-text">
+                            <span>HP: <span id="stats-hp-boss">${gameState.playersStats?.boss?.hp || 0}</span></span>
+                            <div class="def-text">
+                                <span>DEF: <span id="stats-def-boss">${gameState.playersStats?.boss?.def || 0}</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PURPLE: Active skill (text only) -->
+                <div class="active-skill-section">
+                    <div class="active-skill" id="active-skill-boss">
+                        <span class="skill-name">None</span>
+                    </div>
+                </div>
+
+                <!-- WHITE: Status effects -->
+                <div class="status-effects-section">
+                    <div class="status-effects buffs" id="status-effects-boss-buffs"></div>
+                    <div class="status-effects debuffs" id="status-effects-boss-debuffs"></div>
+                </div>
+            </div>
+        `;
+
+        // Update HP bar and status effects
+        this.updateBossHP(gameState.playersStats?.boss, 'boss');
+        this.updateBossStatusEffects(gameState);
     }
 
     updateRound(round) {
@@ -87,7 +302,7 @@ class GameViewer {
     updateBoss(gameState) {
         const { playersStats, currentBoss } = gameState;
 
-        // Update boss name and image
+        // Update boss name and image (for single boss mode)
         const bossName = document.getElementById('boss-name');
         const bossImage = document.getElementById('boss-image');
         if (bossName && currentBoss) {
@@ -100,9 +315,16 @@ class GameViewer {
 
         // Update boss stats
         if (playersStats.boss) {
-            this.updateBossHP(playersStats.boss);
-            this.updateBossCard(playersStats.boss);
+            this.updateBossHP(playersStats.boss, 'boss');
+            this.updateBossCard(playersStats.boss, 'boss');
             this.updateBossStatusEffects(gameState);
+        }
+
+        // Update Minokawa stats if active
+        if (gameState.bakunawaPhase2Active && playersStats.boss2) {
+            this.updateBossHP(playersStats.boss2, 'boss2');
+            this.updateBossCard(playersStats.boss2, 'boss2');
+            this.updateMinokawaStatusEffects(gameState);
         }
     }
 
@@ -142,37 +364,37 @@ class GameViewer {
     }
 
     renderGlobalDungeonBuff(buff) {
-    const container = document.getElementById(buff.id);
-    if (!container) return;
+        const container = document.getElementById(buff.id);
+        if (!container) return;
 
-    // Clear the container
-    container.innerHTML = '';
+        // Clear the container
+        container.innerHTML = '';
 
-    if (buff.active) {
-        // Show the dungeon buff image on the left
-        const buffDiv = document.createElement('div');
-        buffDiv.className = 'special-item';
-        buffDiv.innerHTML = `
-            <img src="asset/ALL CARDS/SPECIAL ITEM CARDS/${buff.image}" alt="${buff.name}" 
-                 onerror="this.src='asset/items/default.png'">
-        `;
-        buffDiv.title = buff.name;
-        container.appendChild(buffDiv);
+        if (buff.active) {
+            // Show the dungeon buff image on the left
+            const buffDiv = document.createElement('div');
+            buffDiv.className = 'special-item';
+            buffDiv.innerHTML = `
+                <img src="asset/ALL CARDS/SPECIAL ITEM CARDS/${buff.image}" alt="${buff.name}" 
+                     onerror="this.src='asset/items/default.png'">
+            `;
+            buffDiv.title = buff.name;
+            container.appendChild(buffDiv);
 
-        // Show the buff indicator on the right ONLY when active
-        const buffTextDiv = document.createElement('div');
-        buffTextDiv.className = 'special-item-text';
-        buffTextDiv.textContent = buff.buff;
-        buffTextDiv.title = `${buff.name} - ${buff.buff}`;
-        container.appendChild(buffTextDiv);
-    } else {
-        // Show empty state - no buff text when inactive
-        const emptyDiv = document.createElement('div');
-        emptyDiv.className = 'special-item-text empty';
-        emptyDiv.textContent = '';
-        container.appendChild(emptyDiv);
+            // Show the buff indicator on the right ONLY when active
+            const buffTextDiv = document.createElement('div');
+            buffTextDiv.className = 'special-item-text';
+            buffTextDiv.textContent = buff.buff;
+            buffTextDiv.title = `${buff.name} - ${buff.buff}`;
+            container.appendChild(buffTextDiv);
+        } else {
+            // Show empty state - no buff text when inactive
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'special-item-text empty';
+            emptyDiv.textContent = '';
+            container.appendChild(emptyDiv);
+        }
     }
-}
 
     renderEmptySlot(slotId) {
         const container = document.getElementById(slotId);
@@ -220,10 +442,10 @@ class GameViewer {
         }
     }
 
-    updateBossHP(stats) {
-        const hpFill = document.getElementById('hp-boss');
-        const hpLabel = document.getElementById('stats-hp-boss');
-        const defLabel = document.getElementById('stats-def-boss');
+    updateBossHP(stats, bossId = 'boss') {
+        const hpFill = document.getElementById(`hp-${bossId}`);
+        const hpLabel = document.getElementById(`stats-hp-${bossId}`);
+        const defLabel = document.getElementById(`stats-def-${bossId}`);
 
         if (hpFill && stats) {
             const maxHP = stats.maxHp || stats.hp || 1;
@@ -250,8 +472,8 @@ class GameViewer {
         }
     }
 
-    updateBossCard(stats) {
-        const card = document.getElementById('boss-card');
+    updateBossCard(stats, bossId = 'boss') {
+        const card = document.getElementById(`${bossId}-card`);
         if (card && stats) {
             if (stats.hp <= 0) {
                 card.classList.add('dead');
@@ -289,12 +511,12 @@ class GameViewer {
                 const [, player, skillName] = playerMatch;
                 this.updateActiveSkill(player, skillName);
             }
-
-            // Parse boss skills
-            const bossMatch = action.match(/(\w+) used (.+?):/);
-            if (bossMatch && !bossMatch[1].startsWith('player')) {
-                const [, boss, skillName] = bossMatch;
-                this.updateActiveSkill('boss', skillName);
+            // Parse boss skills - IMPROVED REGEX to catch both bosses
+            const bossMatch = action.match(/(Bakunawa|Minokawa|Bathala|Mayari|Apolaki|Manananggal|Tiyanak|Siren|Kapre) used (.+?):/);
+            if (bossMatch) {
+                const [, bossName, skillName] = bossMatch;
+                // Always update the unified boss skill display with boss name
+                this.updateActiveSkill('boss', `${bossName}: ${skillName}`);
             }
         });
     }
@@ -335,7 +557,7 @@ class GameViewer {
 
                 if (skillImage) {
                     // Use cleaned skill name for image path
-                    skillImage.src = `asset/ALL CARDS/SKILL CARDS/${charname}/${charname}${cleanSkillName.replace(/ /g, '_').replace('\’', '')}.jpg`;
+                    skillImage.src = `asset/ALL CARDS/SKILL CARDS/${charname}/${charname}${cleanSkillName.replace(/ /g, '_').replace('\'', '')}.jpg`;
                     skillImage.alt = cleanSkillName;
                 }
                 if (skillNameSpan) {
@@ -389,6 +611,30 @@ class GameViewer {
         debuffsContainer.innerHTML = '';
 
         const effects = this.collectEntityEffects('boss', gameState);
+
+        // Separate buffs and debuffs
+        const buffs = effects.filter(effect => effect.type === 'buff');
+        const debuffs = effects.filter(effect => effect.type === 'debuff');
+
+        // Render buffs in upper container
+        this.renderStatusEffects(buffsContainer, buffs);
+
+        // Render debuffs in lower container
+        this.renderStatusEffects(debuffsContainer, debuffs);
+    }
+
+    // NEW: Update Minokawa status effects
+    updateMinokawaStatusEffects(gameState) {
+        const buffsContainer = document.getElementById('status-effects-boss2-buffs');
+        const debuffsContainer = document.getElementById('status-effects-boss2-debuffs');
+
+        if (!buffsContainer || !debuffsContainer) return;
+
+        // Clear both containers
+        buffsContainer.innerHTML = '';
+        debuffsContainer.innerHTML = '';
+
+        const effects = this.collectEntityEffects('boss2', gameState);
 
         // Separate buffs and debuffs
         const buffs = effects.filter(effect => effect.type === 'buff');
@@ -463,7 +709,7 @@ class GameViewer {
             });
         }
 
-        if (entity === 'boss' && bathalaMandateBuff?.turnsLeft > 0) {
+        if ((entity === 'boss' || entity === 'boss2') && bathalaMandateBuff?.turnsLeft > 0) {
             effects.push({
                 name: "Heaven's Mandate",
                 type: 'buff',
@@ -472,7 +718,7 @@ class GameViewer {
             });
         }
 
-        if (entity === 'boss' && daybreakFuryBuff?.turnsLeft > 0) {
+        if ((entity === 'boss' || entity === 'boss2') && daybreakFuryBuff?.turnsLeft > 0) {
             effects.push({
                 name: 'Daybreak Fury',
                 type: 'buff',
@@ -481,7 +727,7 @@ class GameViewer {
             });
         }
 
-        if (entity === 'boss' && strengthenedBuff?.boss?.attacksLeft > 0) {
+        if ((entity === 'boss' || entity === 'boss2') && strengthenedBuff?.boss?.attacksLeft > 0) {
             effects.push({
                 name: 'Strengthened',
                 type: 'buff',
@@ -490,7 +736,7 @@ class GameViewer {
             });
         }
 
-        if (entity === 'boss' && bossInvulnerable?.turnsLeft > 0) {
+        if ((entity === 'boss' || entity === 'boss2') && bossInvulnerable?.turnsLeft > 0) {
             effects.push({
                 name: 'Invulnerable',
                 type: 'buff',
@@ -582,7 +828,7 @@ class GameViewer {
     }
 
     setupUI() {
-        console.log('Game Viewer initialized with global dungeon buffs');
+        console.log('Game Viewer initialized with Minokawa phase support');
     }
 }
 
