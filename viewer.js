@@ -557,7 +557,7 @@ class GameViewer {
 
                 if (skillImage) {
                     // Use cleaned skill name for image path
-                    skillImage.src = `asset/ALL CARDS/SKILL CARDS/${charname}/${charname}${cleanSkillName.replace(/ /g, '_').replace('\'', '')}.jpg`;
+                    skillImage.src = `asset/ALL CARDS/SKILL CARDS/${charname}/${charname}${cleanSkillName.replace(/ /g, '_').replace('\’', '')}.jpg`;
                     skillImage.alt = cleanSkillName;
                 }
                 if (skillNameSpan) {
