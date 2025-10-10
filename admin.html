@@ -357,6 +357,7 @@
             updateBossUI();
             updatePlayerTargetDropdowns();
             updateAllStatusEffectsUI();
+            updateGameStateForViewer();
             if (typeof updateAllSkillCooldownDescriptions === 'function') {
                 updateAllSkillCooldownDescriptions();
             }
@@ -399,6 +400,8 @@
             } else {
                 console.error('Bundok Pulag checkbox not found!');
             }
+
+            setInterval(updateGameStateForViewer, 1000);
         });
 
         // Add this to your existing script.js or in index.html

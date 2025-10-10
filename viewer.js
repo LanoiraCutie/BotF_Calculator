@@ -10,7 +10,10 @@ class GameViewer {
             player4: null,
             boss: null
         };
-        this.currentBackground = 'Background.png'; // Track current background
+        this.currentBackground = 'Background.png';
+        this.currentMusic = null;
+        this.audioContext = null;
+        this.currentBoss = null;
         this.init();
     }
 
@@ -18,6 +21,163 @@ class GameViewer {
         this.connectToAdmin();
         this.setupUI();
         this.initializeSpecialItems();
+        this.initializeAudio();
+    }
+
+    initializeAudio() {
+        // Create audio context for better control
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (error) {
+            console.warn('Web Audio API not supported, using HTML5 audio');
+        }
+
+        // Create audio element for music
+        this.currentMusic = document.createElement('audio');
+        this.currentMusic.loop = true;
+        this.currentMusic.volume = 0.5; // Set default volume
+        this.currentMusic.preload = 'auto';
+
+        // Add audio element to page (hidden)
+        this.currentMusic.style.display = 'none';
+        document.body.appendChild(this.currentMusic);
+
+        console.log('Audio system initialized');
+    }
+
+    getBossMusic(bossName) {
+        const musicMap = {
+            'Bathala': 'KALUWALHATIAN.mp3',
+            'Mayari': 'BUNDOK_PULAG.mp3',
+            'Apolaki': 'DARAGANG_MAGAYON.mp3',
+            'Bakunawa': 'DAGAT_KABISAYAAN.mp3',
+            'Minokawa': 'DAGAT_KABISAYAAN.mp3',
+            'Manananggal': 'BUNDOK_PULAG.mp3',
+            'Tiyanak': 'DARAGANG_MAGAYON.mp3',
+            'Siren': 'DAGAT_KABISAYAAN.mp3',
+            'Kapre': 'KALUWALHATIAN.mp3'
+        };
+
+        const musicFile = musicMap[bossName];
+        console.log(`🎵 getBossMusic: ${bossName} → ${musicFile}`);
+        return musicFile || null;
+    }
+
+    playBossMusic(bossName) {
+        console.log(`🎵 playBossMusic called with: ${bossName}`);
+
+        const musicFile = this.getBossMusic(bossName);
+        console.log(`🎵 Music file for ${bossName}:`, musicFile);
+
+        if (!musicFile) {
+            console.log(`🎵 No music found for boss: ${bossName}`);
+            this.stopMusic();
+            return;
+        }
+
+        const musicPath = `asset/BGMUSIC/NEW MAP OST/${musicFile}`;
+        console.log(`🎵 Full music path: ${musicPath}`);
+
+        // Check if the SAME music file is already playing (not just includes, but exact match)
+        const currentSrc = this.currentMusic.src;
+        const currentFileName = currentSrc ? currentSrc.split('/').pop() : '';
+        const isCurrentlyPlaying = !this.currentMusic.paused && !this.currentMusic.ended;
+        const isSameFile = currentFileName === musicFile;
+
+        console.log(`🎵 Current file: "${currentFileName}"`);
+        console.log(`🎵 Target file: "${musicFile}"`);
+        console.log(`🎵 Files match: ${isSameFile}`);
+        console.log(`🎵 Currently playing: ${isCurrentlyPlaying}`);
+
+        if (isSameFile && isCurrentlyPlaying) {
+            console.log(`🎵 Same music file already playing: ${musicFile}. Continuing playback.`);
+            return;
+        }
+
+        console.log(`🎵 Loading and playing music for ${bossName}: ${musicFile}`);
+
+        // Stop current music and load new one
+        this.currentMusic.pause();
+        this.currentMusic.currentTime = 0;
+        this.currentMusic.src = musicPath;
+
+        // Add event listeners for debugging (but only once)
+        if (!this.currentMusic.hasAttribute('data-listeners-added')) {
+            this.currentMusic.addEventListener('loadstart', () => {
+                console.log(`🎵 Started loading: ${musicFile}`);
+            });
+
+            this.currentMusic.addEventListener('canplay', () => {
+                console.log(`🎵 Can play: ${musicFile}`);
+            });
+
+            this.currentMusic.addEventListener('error', (e) => {
+                console.error(`🎵 Audio error for ${musicFile}:`, e);
+                console.error('Audio error code:', this.currentMusic.error?.code);
+                console.error('Audio error message:', this.currentMusic.error?.message);
+            });
+
+            this.currentMusic.addEventListener('play', () => {
+                console.log(`🎵 Music started playing: ${musicFile}`);
+            });
+
+            this.currentMusic.setAttribute('data-listeners-added', 'true');
+        }
+
+        // Handle loading and playing
+        const playPromise = this.currentMusic.play();
+
+        if (playPromise !== undefined) {
+            playPromise
+                .then(() => {
+                    console.log(`🎵 Successfully started music: ${musicFile}`);
+                })
+                .catch(error => {
+                    console.error(`🎵 Failed to play music ${musicFile}:`, error);
+
+                    // Try to enable audio on user interaction
+                    if (error.name === 'NotAllowedError') {
+                        console.log('🎵 Setting up user interaction audio');
+                        this.setupUserInteractionAudio();
+                    }
+                });
+        }
+    }
+
+    setupUserInteractionAudio() {
+        const enableAudio = () => {
+            if (this.audioContext && this.audioContext.state === 'suspended') {
+                this.audioContext.resume();
+            }
+
+            // Try to play the current music
+            if (this.currentMusic.src && this.currentMusic.paused) {
+                const playPromise = this.currentMusic.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(console.error);
+                }
+            }
+
+            // Remove event listeners after first interaction
+            document.removeEventListener('click', enableAudio);
+            document.removeEventListener('keydown', enableAudio);
+            document.removeEventListener('touchstart', enableAudio);
+        };
+
+        // Add event listeners for user interaction
+        document.addEventListener('click', enableAudio);
+        document.addEventListener('keydown', enableAudio);
+        document.addEventListener('touchstart', enableAudio);
+
+        console.log('Audio will be enabled on user interaction');
+    }
+
+    stopMusic() {
+        if (this.currentMusic) {
+            this.currentMusic.pause();
+            this.currentMusic.currentTime = 0;
+            console.log('Music stopped');
+        }
     }
 
     connectToAdmin() {
@@ -31,11 +191,31 @@ class GameViewer {
                 const gameData = localStorage.getItem('botf_game_state');
                 if (gameData) {
                     const newState = JSON.parse(gameData);
-                    if (JSON.stringify(newState) !== JSON.stringify(this.gameState)) {
-                        this.gameState = newState;
-                        this.updateUI(newState);
-                        this.updateConnectionStatus(true);
+
+                    // Debug: Log the game state
+                    console.log('Game state received:', {
+                        currentBoss: newState.currentBoss,
+                        bakunawaPhase2Active: newState.bakunawaPhase2Active
+                    });
+
+                    // Check for state changes BEFORE updating this.gameState
+                    const oldBoss = this.currentBoss;
+                    const newBoss = this.getBossFromGameState(newState);
+
+                    // Always update the UI and state
+                    this.gameState = newState;
+                    this.updateUI(newState);
+                    this.updateConnectionStatus(true);
+
+                    // Check for boss change and handle music
+                    if (oldBoss !== newBoss) {
+                        console.log('Boss change detected:', { oldBoss, newBoss });
+                        this.currentBoss = newBoss;
+                        this.handleBossChange(newBoss, newState);
                     }
+                } else {
+                    console.log('No game state found in localStorage');
+                    this.updateConnectionStatus(false);
                 }
             } catch (error) {
                 console.error('Error polling game state:', error);
@@ -44,16 +224,83 @@ class GameViewer {
         }, 500);
     }
 
+    getBossFromGameState(gameState) {
+        // Try to get boss from currentBoss field first
+        if (gameState.currentBoss) {
+            console.log('🎵 Boss from gameState.currentBoss:', gameState.currentBoss);
+            return gameState.currentBoss;
+        }
+
+        console.log('🎵 No boss found in gameState, returning null');
+        return null;
+    }
+
+    handleBossChange(newBoss, gameState) {
+        console.log(`🎵 handleBossChange called with boss: ${newBoss}`);
+        console.log('🎵 Minokawa phase active:', gameState.bakunawaPhase2Active);
+
+        // Store what music we should be playing
+        let targetMusicBoss = null;
+
+        // Handle Minokawa phase first
+        this.handleMinokawaPhase(gameState);
+
+        // Then handle music
+        if (gameState.bakunawaPhase2Active) {
+            console.log('🎵 Should play Minokawa music for dual boss phase');
+            targetMusicBoss = 'Minokawa';
+        } else if (newBoss) {
+            console.log('🎵 Should play normal boss music:', newBoss);
+            targetMusicBoss = newBoss;
+        } else {
+            console.log('🎵 No boss selected, stopping music');
+            this.stopMusic();
+            return;
+        }
+
+        // Get the music file that should be playing
+        const targetMusicFile = this.getBossMusic(targetMusicBoss);
+        const currentSrc = this.currentMusic.src;
+        const isCurrentlyPlaying = !this.currentMusic.paused && !this.currentMusic.ended;
+
+        // IMPROVED: Better file name comparison
+        const currentFileName = currentSrc ? currentSrc.split('/').pop() : '';
+        const targetFileName = targetMusicFile || '';
+        const isSameFile = currentFileName === targetFileName;
+
+        console.log(`🎵 Current playing: ${currentFileName}`);
+        console.log(`🎵 Target music: ${targetFileName}`);
+        console.log(`🎵 Same file check: ${isSameFile}`);
+        console.log(`🎵 Currently playing: ${isCurrentlyPlaying}`);
+
+        if (targetMusicFile && isSameFile && isCurrentlyPlaying) {
+            console.log(`🎵 Target music ${targetMusicFile} is already playing. No change needed.`);
+            return;
+        }
+
+        // Different music needed, change it
+        console.log(`🎵 Changing music to: ${targetMusicBoss}`);
+        this.playBossMusic(targetMusicBoss);
+    }
+
     updateConnectionStatus(connected) {
         const status = document.getElementById('connection-status');
-        if (connected !== this.connected) {
-            this.connected = connected;
-            if (connected) {
-                status.textContent = 'Connected';
-                status.className = 'connection-status connected';
-            } else {
-                status.textContent = 'Disconnected';
-                status.className = 'connection-status';
+        if (status) {
+            if (connected !== this.connected) {
+                this.connected = connected;
+                if (connected) {
+                    status.textContent = 'Connected';
+                    status.className = 'connection-status connected';
+                } else {
+                    status.textContent = 'Disconnected';
+                    status.className = 'connection-status';
+                }
+            }
+        } else {
+            // Create connection status element if it doesn't exist
+            if (connected !== this.connected) {
+                this.connected = connected;
+                console.log(`Connection status: ${connected ? 'Connected' : 'Disconnected'}`);
             }
         }
     }
@@ -72,35 +319,41 @@ class GameViewer {
 
     // NEW: Handle Minokawa phase transition
     handleMinokawaPhase(gameState) {
-    const isMinokawaActive = gameState.bakunawaPhase2Active;
-    const shouldChangeBackground = isMinokawaActive && this.currentBackground !== 'Background_Mino.png';
-    const shouldRevertBackground = !isMinokawaActive && this.currentBackground !== 'Background.png';
+        const isMinokawaActive = gameState.bakunawaPhase2Active;
+        const shouldChangeBackground = isMinokawaActive && this.currentBackground !== 'Background_Mino.png';
+        const shouldRevertBackground = !isMinokawaActive && this.currentBackground !== 'Background.png';
 
-    // Change background when phase changes
-    if (shouldChangeBackground) {
-        this.changeBackground('Background_Mino.png'); // Make sure this matches your actual file
-        this.updateBossLayoutForMinokawa(gameState);
-    } else if (shouldRevertBackground) {
-        this.changeBackground('Background.png');
-        this.updateBossLayoutForSingle(gameState);
+        // Change background when phase changes
+        if (shouldChangeBackground) {
+            this.changeBackground('Background_Mino.png'); // Make sure this matches your actual file
+            this.updateBossLayoutForMinokawa(gameState);
+
+            this.playBossMusic('Minokawa');
+        } else if (shouldRevertBackground) {
+            this.changeBackground('Background.png');
+            this.updateBossLayoutForSingle(gameState);
+
+            if (this.currentBoss) {
+                this.playBossMusic(this.currentBoss);
+            }
+        }
     }
-}
 
     // Change background image
     changeBackground(backgroundFile) {
-    // Target the correct element that has the background in CSS
-    const fixedLayout = document.querySelector('.fixed-layout');
-    if (fixedLayout) {
-        fixedLayout.style.backgroundImage = `url('asset/${backgroundFile}')`;
-        fixedLayout.style.backgroundSize = 'cover';
-        fixedLayout.style.backgroundPosition = 'center';
-        fixedLayout.style.backgroundRepeat = 'no-repeat';
-        this.currentBackground = backgroundFile;
-        console.log(`Background changed to: ${backgroundFile}`);
-    } else {
-        console.error('Fixed layout container not found for background change');
+        // Target the correct element that has the background in CSS
+        const fixedLayout = document.querySelector('.fixed-layout');
+        if (fixedLayout) {
+            fixedLayout.style.backgroundImage = `url('asset/${backgroundFile}')`;
+            fixedLayout.style.backgroundSize = 'cover';
+            fixedLayout.style.backgroundPosition = 'center';
+            fixedLayout.style.backgroundRepeat = 'no-repeat';
+            this.currentBackground = backgroundFile;
+            console.log(`Background changed to: ${backgroundFile}`);
+        } else {
+            console.error('Fixed layout container not found for background change');
+        }
     }
-}
 
     // Update boss layout for Minokawa phase (dual bosses)
     updateBossLayoutForMinokawa(gameState) {

@@ -266,6 +266,58 @@ function resetAllBuffsDebuffsAndCooldowns() {
     console.log('Reset complete: All buffs, debuffs, shields, and cooldowns cleared. HP restored to max.');
 }
 
+function isMiniboss(bossName) {
+    const minibosses = ['Manananggal', 'Tiyanak', 'Siren', 'Kapre'];
+    return minibosses.includes(bossName);
+}
+
+function preserveMinibossState() {
+    console.log('Preserving state for miniboss transition...');
+    
+    // Store current player HP values
+    const preservedPlayerHP = {};
+    ['player1', 'player2', 'player3', 'player4'].forEach(player => {
+        if (playersStats[player]) {
+            preservedPlayerHP[player] = playersStats[player].hp;
+        }
+    });
+
+    // Store current cooldowns
+    const preservedCooldowns = {};
+    ['player1', 'player2', 'player3', 'player4'].forEach(player => {
+        preservedCooldowns[player] = { ...cooldowns[player] };
+    });
+
+    return { preservedPlayerHP, preservedCooldowns };
+}
+
+function restoreMinibossState(preservedState) {
+    console.log('Restoring state after miniboss transition...');
+    
+    const { preservedPlayerHP, preservedCooldowns } = preservedState;
+
+    // Restore player HP
+    Object.keys(preservedPlayerHP).forEach(player => {
+        if (playersStats[player]) {
+            playersStats[player].hp = preservedPlayerHP[player];
+            updateHPAndShieldUI(player);
+            
+            const label = document.getElementById(`stats-hp-${player}`);
+            if (label) label.innerText = playersStats[player].hp;
+        }
+    });
+
+    // Restore cooldowns
+    Object.keys(preservedCooldowns).forEach(player => {
+        cooldowns[player] = { ...preservedCooldowns[player] };
+    });
+
+    // Update UI to reflect restored cooldowns
+    updateAllSkillCooldownDescriptions();
+    
+    console.log('Miniboss state restoration complete.');
+}
+
 // Status effect update function
 function updateStatusEffectsUI(entity) {
     const container = document.getElementById(`status-effects-${entity}`);
@@ -1295,20 +1347,88 @@ function applyPreset(player) {
         selectedPreset = bossSelect ? bossSelect.value : 'preset1';
 
         // Store the previous boss name for comparison
+        const previousBoss = window.currentBossName;
+        
         if (!window.currentBossName) {
             window.currentBossName = selectedPreset; // Initialize on first load
         }
 
-        // Reset everything when boss actually changes (not on initial load)
+        // Check if we're switching between bosses (not on initial load)
         if (window.currentBossName !== selectedPreset) {
             console.log(`Boss changed from ${window.currentBossName} to ${selectedPreset}`);
+
+            // Check if both old and new bosses are minibosses
+            const isOldMiniboss = previousBoss ? isMiniboss(previousBoss) : false;
+            const isNewMiniboss = isMiniboss(selectedPreset);
+
+            let preservedState = null;
+
+            // Only preserve state if switching between minibosses OR from miniboss to main boss
+            if (isOldMiniboss && (isNewMiniboss || !isNewMiniboss)) {
+                preservedState = preserveMinibossState();
+                console.log(`Preserving state: ${previousBoss} (miniboss) → ${selectedPreset}`);
+            }
 
             // Check if the NEW boss should be dead BEFORE calling reset
             const shouldNewBossStayDead = window.deadBosses.has(selectedPreset);
 
-            resetAllBuffsDebuffsAndCooldowns();
+            // Only do full reset if switching FROM a main boss OR TO a main boss from main boss
+            if (!isOldMiniboss || (!isNewMiniboss && !isOldMiniboss)) {
+                resetAllBuffsDebuffsAndCooldowns();
+                console.log(`Full reset: switching from ${isOldMiniboss ? 'miniboss' : 'main boss'} to ${isNewMiniboss ? 'miniboss' : 'main boss'}`);
+            } else {
+                // Just clear buffs/debuffs but preserve HP and cooldowns
+                console.log('Miniboss transition: clearing buffs/debuffs only');
+                
+                // Clear all buff/debuff timers (but preserve checkbox-activated ones)
+                const preserveDungeon1 = window.dungeonBuff1Active;
+                const preserveDungeon2 = window.dungeonBuff2Active;
+                const preserveDungeon3 = window.dungeonBuff3Active;
+                const preserveCrit = window.critActive;
 
-            // If the new boss should be dead, force it dead after reset
+                // Reset boss buffs/debuffs
+                window.bathalaMandateBuff = { turnsLeft: 0, defIncrease: 0 };
+                window.daybreakFuryBuff = { turnsLeft: 0, atkIncrease: 0, defIgnore: 0 };
+                window.strengthenedBuff = {};
+                window.bossInvulnerable = { turnsLeft: 0 };
+
+                // Reset player buffs/debuffs
+                window.mandirigmaRageBuff = { turnsLeft: 0, dmgIncrease: 0, defIgnore: 0 };
+                window.baganiLastStandBuff = { turnsLeft: 0, defIncrease: 0 };
+                window.blessingBuff = {};
+                window.focusAimBuff = {};
+
+                // Clear all debuffs
+                window.bindDebuffs = {};
+                window.devouredDebuffs = {};
+                window.eyeDragonDebuffs = {};
+                window.moonfallDebuffs = {};
+                window.bonecrackedDebuffs = {};
+
+                // Clear all shields
+                ['player1', 'player2', 'player3', 'player4', 'boss', 'boss2'].forEach(entity => {
+                    if (playersStats[entity]) {
+                        playersStats[entity].shield = 0;
+                        playersStats[entity].shieldStacks = [];
+                    }
+                });
+
+                // Restore checkbox-activated buffs
+                window.dungeonBuff1Active = preserveDungeon1;
+                window.dungeonBuff2Active = preserveDungeon2;
+                window.dungeonBuff3Active = preserveDungeon3;
+                window.critActive = preserveCrit;
+
+                // Update status effects UI
+                updateAllStatusEffectsUI();
+            }
+
+            // Restore preserved state if we saved it
+            if (preservedState && isOldMiniboss) {
+                restoreMinibossState(preservedState);
+            }
+
+            // If the new boss should be dead, force it dead after any reset
             if (shouldNewBossStayDead) {
                 playersStats.boss.hp = 0;
                 window.deadEntities.add('boss');
@@ -1365,13 +1485,21 @@ function applyPreset(player) {
             hpBar.style.backgroundColor = '#666';
         }
     } else {
-        // Normal alive state
-        if (hpEl) hpEl.innerText = newStats.hp;
+        // Normal alive state - only reset HP if not preserving from miniboss
+        const shouldPreserveHP = window.currentBossName && 
+                                isMiniboss(window.currentBossName) && 
+                                player === 'boss' &&
+                                !window.deadBosses.has(selectedPreset);
+        
+        if (!shouldPreserveHP || player !== 'boss') {
+            if (hpEl) hpEl.innerText = newStats.hp;
+        }
+        
         if (atkEl) atkEl.innerText = newStats.atk || newStats.mag || 0;
         if (defEl) defEl.innerText = newStats.def;
         if (magEl) magEl.innerText = newStats.mag || 0;
 
-        if (hpBar) {
+        if (hpBar && (!shouldPreserveHP || player !== 'boss')) {
             hpBar.style.width = '100%';
             hpBar.style.backgroundColor = '#4caf50';
         }
@@ -1380,6 +1508,7 @@ function applyPreset(player) {
     // Update UI after boss change
     if (player === 'boss') {
         updateBossUI();
+        updateGameStateForViewer();
     }
 
     if (player !== 'boss' || !window.deadEntities.has('boss')) {
@@ -1387,7 +1516,51 @@ function applyPreset(player) {
     }
 }
 
-// Fix 2: Replace updatePlayerTargetDropdowns with separate ally/enemy targeting
+function updateGameStateForViewer() {
+    const bossSelect = document.getElementById('preset-entity');
+    const currentBoss = bossSelect ? bossSelect.value : null;
+    
+    const gameState = {
+        currentRound: currentRound,
+        currentBoss: currentBoss,
+        playersStats: playersStats,
+        bakunawaPhase2Active: window.bakunawaPhase2Active,
+        actionLog: getRecentActionLog(), // You'll need to implement this
+        // Add other game state properties as needed
+        dungeonBuff1Active: window.dungeonBuff1Active,
+        dungeonBuff2Active: window.dungeonBuff2Active,
+        dungeonBuff3Active: window.dungeonBuff3Active,
+        // Add all your buff/debuff states
+        mandirigmaRageBuff: window.mandirigmaRageBuff,
+        baganiLastStandBuff: window.baganiLastStandBuff,
+        blessingBuff: window.blessingBuff,
+        focusAimBuff: window.focusAimBuff,
+        bathalaMandateBuff: window.bathalaMandateBuff,
+        daybreakFuryBuff: window.daybreakFuryBuff,
+        strengthenedBuff: window.strengthenedBuff,
+        bossInvulnerable: window.bossInvulnerable,
+        bonecrackedDebuffs: window.bonecrackedDebuffs,
+        bindDebuffs: window.bindDebuffs,
+        moonfallDebuffs: window.moonfallDebuffs,
+        eyeDragonDebuffs: window.eyeDragonDebuffs,
+        devouredDebuffs: window.devouredDebuffs
+    };
+    
+    // Save to localStorage for viewer to pick up
+    localStorage.setItem('botf_game_state', JSON.stringify(gameState));
+}
+
+function getRecentActionLog() {
+    const damageLog = document.getElementById('damage-log');
+    if (!damageLog) return [];
+    
+    const logEntries = [];
+    for (let i = 0; i < Math.min(50, damageLog.children.length); i++) {
+        logEntries.push(damageLog.children[i].textContent);
+    }
+    return logEntries.reverse(); // Return in chronological order
+}
+
 function updatePlayerTargetDropdowns() {
     ['player1', 'player2', 'player3', 'player4'].forEach(player => {
         // Update ally targeting (for heals/buffs)
